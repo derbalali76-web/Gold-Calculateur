@@ -49,17 +49,37 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.goldcalculateur.app.ui.theme.extra
 
-/** Look of the mockup: deep-blue gradients, gold gradients, fine blue grid lines. */
+/**
+ * Everything is laid out in "mockup pixels": the mockup is 1024 px wide, and [LocalU] is dp-per-mockup-pixel
+ * (screen width / 1024), so proportions match the design on every phone width.
+ */
+val LocalU = androidx.compose.runtime.compositionLocalOf { 0.4f }
+
+@Composable
+fun Int.px(): Dp = (this * LocalU.current).dp
+
+@Composable
+fun Int.spx(): androidx.compose.ui.unit.TextUnit = (this * LocalU.current).sp
+
+/** Colours sampled from the mockup. */
 object Look {
-    val GoldGradient = Brush.verticalGradient(listOf(Color(0xFFFFE87A), Color(0xFFF7C531), Color(0xFFDDA20F)))
-    val GoldTextGradient = Brush.verticalGradient(listOf(Color(0xFFFFF0A0), Color(0xFFF5C02B), Color(0xFFD9A00F)))
-    val GoldBorder = Brush.verticalGradient(listOf(Color(0xFFF3CB52), Color(0xFFB88416), Color(0xFFE8B93A)))
-    val CardGradientDark = Brush.verticalGradient(listOf(Color(0xFF0C2347), Color(0xFF081832)))
-    val ScreenGradientDark = Brush.verticalGradient(listOf(Color(0xFF071A38), Color(0xFF040E22)))
-    val GridLine = Color(0xFF2E536A)
-    val TableHeader = Color(0xFF0A2848)
-    val TableCell = Color(0xFF0B2038)
+    val GoldGradient = Brush.verticalGradient(listOf(Color(0xFFFEF07A), Color(0xFFFCD23A), Color(0xFFF2B51C), Color(0xFFDDA20F)))
+    val GoldTextGradient = Brush.verticalGradient(listOf(Color(0xFFFBE98A), Color(0xFFF9DF78), Color(0xFFFBCE3A)))
+    val GoldBorder = Brush.verticalGradient(listOf(Color(0xFFE9C24B), Color(0xFFB8801A), Color(0xFFD9A93A)))
+    val CardGradientDark = Brush.verticalGradient(listOf(Color(0xFF011422), Color(0xFF001D35), Color(0xFF00111F)))
+    val FrameGradient = Brush.verticalGradient(listOf(Color(0xFF011121), Color(0xFF000C18), Color(0xFF000811)))
+    val ScreenGradientDark = Brush.verticalGradient(listOf(Color(0xFF00152C), Color(0xFF000B1A), Color(0xFF01040B)))
+    val UnselectedGradient = Brush.verticalGradient(listOf(Color(0xFF0F3149), Color(0xFF01182A)))
+    val GridLine = Color(0xFF234D67)
+    val TableHeader = Color(0xFF02182B)
+    val TableCell = Color(0xFF010C19)
+    val FieldBg = Color(0xFF010B19)
+    val FieldBorder = Color(0xFF4F7695)
+    val ResultCell = Color(0xFF001224)
+    val GreenRowBg = Color(0xFF003614)
+    val GreenRowBorder = Color(0xFF1FA23A)
     val OnGold = Color(0xFF1B1405)
+    val Cream = Color(0xFFF5F1E6)
 }
 
 /** Navy card with a gold gradient outline (rounded like the mockup). */
@@ -113,8 +133,8 @@ fun KaratStepper(value: String, onChange: (String) -> Unit, base: Int, modifier:
         modifier = modifier
             .width(40.dp)
             .clip(shape)
-            .background(Look.TableCell)
-            .border(1.dp, Look.GridLine, shape),
+            .background(Look.FieldBg)
+            .border(1.dp, Look.FieldBorder, shape),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Box(Modifier.fillMaxWidth().weight(1f).clickable { step(1) }, contentAlignment = Alignment.Center) {
@@ -139,10 +159,11 @@ fun CompactField(
     isError: Boolean = false,
     imeAction: ImeAction = ImeAction.Next,
     height: Dp = 46.dp,
-    fontSize: Int = 19,
+    fontSize: androidx.compose.ui.unit.TextUnit = 19.sp,
     plain: Boolean = false,
+    radius: Dp = 10.dp,
 ) {
-    val shape = RoundedCornerShape(10.dp)
+    val shape = RoundedCornerShape(radius)
     val colors = MaterialTheme.colorScheme
     val borderColor = if (isError) colors.error else colors.outline
     BasicTextField(
@@ -151,7 +172,7 @@ fun CompactField(
         singleLine = true,
         textStyle = TextStyle(
             color = colors.onSurface,
-            fontSize = fontSize.sp,
+            fontSize = fontSize,
             fontWeight = FontWeight.SemiBold,
             textAlign = TextAlign.Center,
             textDirection = TextDirection.Ltr,
@@ -161,10 +182,10 @@ fun CompactField(
         modifier = modifier
             .height(height)
             .clip(shape)
-            .background(if (plain) Color.Transparent else MaterialTheme.extra.fieldBackground)
+            .background(if (plain) Color.Transparent else if (MaterialTheme.extra.isDark) Look.FieldBg else MaterialTheme.extra.fieldBackground)
             .then(
                 if (plain && !isError) Modifier
-                else Modifier.border(if (isError) 2.dp else 1.dp, if (plain) colors.error else borderColor, shape)
+                else Modifier.border(if (isError) 2.dp else 1.dp, if (plain) colors.error else if (MaterialTheme.extra.isDark && !isError) Look.FieldBorder else borderColor, shape)
             ),
         decorationBox = { inner ->
             Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
@@ -172,7 +193,7 @@ fun CompactField(
                     Text(
                         placeholder,
                         color = colors.onSurfaceVariant.copy(alpha = 0.45f),
-                        fontSize = fontSize.sp,
+                        fontSize = fontSize,
                         textAlign = TextAlign.Center,
                     )
                 }

@@ -19,10 +19,10 @@ import androidx.compose.ui.unit.sp
 
 /** Palette: deep navy + elegant gold. Success green, alert red. */
 object Palette {
-    val Navy = Color(0xFF0A1428)
-    val NavyCard = Color(0xFF111E3A)
-    val NavyCardAlt = Color(0xFF182A4F)
-    val NavyOutline = Color(0xFF3A4A70)
+    val Navy = Color(0xFF000F20)
+    val NavyCard = Color(0xFF011422)
+    val NavyCardAlt = Color(0xFF0B2A44)
+    val NavyOutline = Color(0xFF234D67)
     val Gold = Color(0xFFD4AF37)
     val GoldBright = Color(0xFFF2CC5A)
     val GoldDeep = Color(0xFF8A6A00)

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -72,20 +73,29 @@ import java.math.BigDecimal
 @Composable
 fun ResultCard(state: MainUiState, nf: NumberFormatter, actions: MainActions, modifier: Modifier = Modifier) {
     val result = state.result ?: return
-    SectionCard(modifier.testTag("result_card")) {
+    val cardShape = RoundedCornerShape(28.px())
+    Column(
+        modifier
+            .fillMaxWidth()
+            .clip(cardShape)
+            .background(if (MaterialTheme.extra.isDark) Look.CardGradientDark else Brush.verticalGradient(listOf(MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surface)))
+            .border(2.px(), Look.GoldBorder, cardShape)
+            .padding(horizontal = 27.px(), vertical = 10.px())
+            .testTag("result_card"),
+    ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Image(painterResource(R.drawable.art_ic_chart), contentDescription = null, modifier = Modifier.size(width = 28.dp, height = 22.dp))
-            Spacer(Modifier.width(8.dp))
+            Image(painterResource(R.drawable.art_ic_chart), contentDescription = null, modifier = Modifier.size(width = 44.px(), height = 36.px()))
+            Spacer(Modifier.width(12.px()))
             Text(
                 stringResource(R.string.result_title), color = MaterialTheme.extra.goldText,
-                fontSize = 22.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f),
+                fontSize = 34.spx(), fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f),
             )
             if (result.isSuccess) {
                 IconTextButton(Icons.Filled.ContentCopy, stringResource(R.string.copy_result), actions.onCopy, "copy_result")
                 IconTextButton(Icons.Filled.Share, stringResource(R.string.share_result), actions.onShare, "share_result")
             }
         }
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(10.px()))
 
         when (result) {
             is ResultUi.Failure -> MessageBox(errorMessage(result.error), isError = true, tag = "result_error")
@@ -138,23 +148,23 @@ private fun CutBody(res: ResultUi.Cut, scale: ScalePrecision, nf: NumberFormatte
     val plan: CutPlan? = a.plan
     ResultTable {
         // Selected ingot: a dropdown inside the table (no extra screen, no long list of alternatives).
-        Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min), verticalAlignment = Alignment.CenterVertically) {
-            Box(Modifier.weight(0.56f).padding(horizontal = 10.dp, vertical = 12.dp)) {
-                Text(stringResource(R.string.r_selected_ingot), color = MaterialTheme.colorScheme.onBackground, fontSize = 17.sp)
+        Row(Modifier.fillMaxWidth().height(45.px()), verticalAlignment = Alignment.CenterVertically) {
+            Box(Modifier.weight(1f).fillMaxHeight().padding(horizontal = 18.px()), contentAlignment = Alignment.CenterStart) {
+                Text(stringResource(R.string.r_selected_ingot), color = Look.Cream, fontSize = 27.spx(), maxLines = 1)
             }
             VerticalDivider(color = Look.GridLine)
-            Box(Modifier.weight(0.44f).padding(4.dp), contentAlignment = Alignment.Center) {
+            Box(Modifier.weight(1f).fillMaxHeight().padding(3.px()), contentAlignment = Alignment.Center) {
                 Row(
                     Modifier
                         .clip(RoundedCornerShape(10.dp))
                         .border(1.dp, Look.GridLine, RoundedCornerShape(10.dp))
                         .clickable { menuOpen = true }
-                        .padding(horizontal = 8.dp, vertical = 8.dp)
+                        .padding(horizontal = 14.px(), vertical = 4.px())
                         .testTag("cut_ingot_dropdown"),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(ingotOption(res, a.selectedIndex, nf), fontWeight = FontWeight.SemiBold, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurface)
-                    Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null, tint = MaterialTheme.extra.goldText)
+                    Text(ingotOption(res, a.selectedIndex, nf), fontWeight = FontWeight.Medium, fontSize = 28.spx(), color = MaterialTheme.colorScheme.onSurface)
+                    Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null, tint = MaterialTheme.extra.goldText, modifier = Modifier.size(34.px()))
                 }
                 DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                     a.candidates.forEach { c ->
@@ -225,36 +235,37 @@ private fun ingotOption(res: ResultUi.Cut, engineIndex: Int, nf: NumberFormatter
 /** Table + the gold nugget artwork beside it (like the mockup). */
 @Composable
 private fun ResultTable(content: @Composable ColumnScope.() -> Unit) {
-    val shape = RoundedCornerShape(12.dp)
+    val shape = RoundedCornerShape(12.px())
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Column(
             Modifier
-                .weight(1f)
+                .weight(742f)
                 .clip(shape)
-                .background(Look.TableCell)
-                .border(1.dp, Look.GridLine, shape),
+                .background(Look.ResultCell)
+                .border(1.px(), Look.GridLine, shape),
             content = content,
         )
-        Spacer(Modifier.width(6.dp))
-        Image(painterResource(R.drawable.art_nugget), contentDescription = null, modifier = Modifier.size(width = 64.dp, height = 60.dp))
+        Box(Modifier.weight(180f), contentAlignment = Alignment.Center) {
+            Image(painterResource(R.drawable.art_nugget), contentDescription = null, modifier = Modifier.size(width = 150.px(), height = 140.px()))
+        }
     }
 }
 
 @Composable
 private fun ResultRow(label: String, value: String, big: Boolean = false, tag: String? = null) {
     Column {
-        Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min), verticalAlignment = Alignment.CenterVertically) {
-            Box(Modifier.weight(0.56f).padding(horizontal = 10.dp, vertical = 9.dp)) {
-                Text(label, color = MaterialTheme.colorScheme.onBackground, fontSize = 16.sp)
+        Row(Modifier.fillMaxWidth().height(43.px()), verticalAlignment = Alignment.CenterVertically) {
+            Box(Modifier.weight(1f).fillMaxHeight().padding(horizontal = 18.px()), contentAlignment = Alignment.CenterStart) {
+                Text(label, color = Look.Cream, fontSize = 27.spx(), maxLines = 1)
             }
             VerticalDivider(color = Look.GridLine)
-            Box(Modifier.weight(0.44f).padding(horizontal = 6.dp, vertical = 9.dp), contentAlignment = Alignment.Center) {
+            Box(Modifier.weight(1f).fillMaxHeight(), contentAlignment = Alignment.Center) {
                 Text(
                     value,
                     modifier = if (tag != null) Modifier.testTag(tag) else Modifier,
                     color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = if (big) 22.sp else 20.sp, fontWeight = FontWeight.SemiBold,
-                    textAlign = TextAlign.Center,
+                    fontSize = 30.spx(), fontWeight = FontWeight.Medium,
+                    textAlign = TextAlign.Center, maxLines = 1,
                     style = androidx.compose.ui.text.TextStyle(textDirection = TextDirection.Ltr),
                 )
             }
@@ -267,34 +278,36 @@ private fun ResultRow(label: String, value: String, big: Boolean = false, tag: S
 @Composable
 private fun FinalKaratRow(value: String, deviationNoticeable: Boolean) {
     val color = if (deviationNoticeable) MaterialTheme.extra.warning else MaterialTheme.extra.success
+    val shape = RoundedCornerShape(12.px())
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(IntrinsicSize.Min)
-            .background(color.copy(alpha = 0.16f))
+            .height(54.px())
+            .clip(shape)
+            .background(if (deviationNoticeable) color.copy(alpha = 0.16f) else Look.GreenRowBg)
+            .border(1.px(), if (deviationNoticeable) color else Look.GreenRowBorder, shape)
             .testTag("final_karat_row"),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(Modifier.weight(0.56f).padding(horizontal = 10.dp, vertical = 10.dp)) {
+        Box(Modifier.weight(1f).fillMaxHeight().padding(horizontal = 18.px()), contentAlignment = Alignment.CenterStart) {
             Text(
                 stringResource(R.string.r_final_karat),
-                color = MaterialTheme.colorScheme.onSurface, fontSize = 18.sp, fontWeight = FontWeight.SemiBold,
+                color = Look.Cream, fontSize = 30.spx(), fontWeight = FontWeight.Bold, maxLines = 1,
             )
         }
-        VerticalDivider(color = color.copy(alpha = 0.6f))
         Row(
-            Modifier.weight(0.44f).padding(horizontal = 6.dp, vertical = 10.dp),
+            Modifier.weight(1f).fillMaxHeight(),
             horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                value, color = color, fontSize = 26.sp, fontWeight = FontWeight.Bold,
+                value, color = color, fontSize = 40.spx(), fontWeight = FontWeight.Bold,
                 modifier = Modifier.testTag("final_karat"),
                 style = androidx.compose.ui.text.TextStyle(textDirection = TextDirection.Ltr),
             )
-            Spacer(Modifier.width(8.dp))
+            Spacer(Modifier.width(14.px()))
             Icon(
                 if (deviationNoticeable) Icons.Filled.Warning else Icons.Filled.Check,
-                contentDescription = null, tint = color, modifier = Modifier.size(24.dp),
+                contentDescription = null, tint = color, modifier = Modifier.size(34.px()),
             )
         }
     }
@@ -348,10 +361,10 @@ private fun Details(rows: List<Pair<String, String>>) {
 
 @Composable
 private fun Note(text: String) {
-    Row(Modifier.padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-        Text(text, modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.onBackground, fontSize = 14.sp)
-        Spacer(Modifier.width(6.dp))
-        Icon(Icons.Filled.Info, contentDescription = null, tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(22.dp))
+    Row(Modifier.padding(top = 14.px()), verticalAlignment = Alignment.CenterVertically) {
+        Text(text, modifier = Modifier.weight(1f), color = Look.Cream, fontSize = 26.spx())
+        Spacer(Modifier.width(10.px()))
+        Icon(Icons.Filled.Info, contentDescription = null, tint = Look.Cream, modifier = Modifier.size(38.px()))
     }
 }
 
