@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group android:scaleX="1.0" android:scaleY="1.0" android:translateX="0" android:translateY="0">
+        <!-- ingot stack centred in the 66dp safe zone -->
+        <path android:fillColor="#B8860B" android:pathData="M26,72 L34,54 L56,54 L50,72 Z" />
+        <path android:fillColor="#F2CC5A" android:pathData="M34,54 L40,45 L59,45 L56,54 Z" />
+        <path android:fillColor="#B8860B" android:pathData="M52,72 L58,54 L82,54 L78,72 Z" />
+        <path android:fillColor="#F2CC5A" android:pathData="M58,54 L64,45 L82,45 L82,54 Z" />
+        <path android:fillColor="#D4AF37" android:pathData="M38,50 L44,32 L68,32 L62,50 Z" />
+        <path android:fillColor="#FFE58A" android:pathData="M44,32 L48,24 L67,24 L68,32 Z" />
+    </group>
+</vector>

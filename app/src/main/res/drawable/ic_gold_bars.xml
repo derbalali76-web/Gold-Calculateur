@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Small stack of three gold ingots (own artwork). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <!-- bottom-left ingot -->
+    <path android:fillColor="#B8860B" android:pathData="M4,40 L10,28 L26,28 L22,40 Z" />
+    <path android:fillColor="#F2CC5A" android:pathData="M10,28 L14,22 L28,22 L26,28 Z" />
+    <!-- bottom-right ingot -->
+    <path android:fillColor="#B8860B" android:pathData="M24,40 L28,28 L44,28 L42,40 Z" />
+    <path android:fillColor="#F2CC5A" android:pathData="M28,28 L32,22 L44,22 L44,28 Z" />
+    <!-- top ingot -->
+    <path android:fillColor="#D4AF37" android:pathData="M14,26 L18,14 L34,14 L30,26 Z" />
+    <path android:fillColor="#FFE58A" android:pathData="M18,14 L21,9 L33,9 L34,14 Z" />
+</vector>

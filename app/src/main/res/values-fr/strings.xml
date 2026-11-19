@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tagline">Calculateur d\'ajustement du titre de l\'or</string>
+
+    <string name="col_ingot">Lingot</string>
+    <string name="col_weight">Poids (g)</string>
+    <string name="col_karat">Titre</string>
+    <string name="cd_delete_ingot">Supprimer le lingot %1$d</string>
+    <string name="add_ingot_row">Ajouter un lingot</string>
+
+    <string name="summary_total_weight">Poids total</string>
+    <string name="summary_average_karat">Titre moyen</string>
+    <string name="target_karat">Titre visé</string>
+    <string name="mode_cut">Couper et affiner</string>
+    <string name="mode_add">Ajouter un lingot</string>
+    <string name="added_karat">Titre du lingot ajouté</string>
+
+    <string name="unit_g">g</string>
+    <string name="result_title">Résultat</string>
+    <string name="r_selected_ingot">Lingot choisi</string>
+    <string name="r_cut_weight">Poids à couper</string>
+    <string name="r_recovered_gold">Or pur récupéré</string>
+    <string name="r_remaining_weight">Poids restant du lingot</string>
+    <string name="r_final_weight">Poids final du groupe</string>
+    <string name="r_final_karat">Titre final</string>
+    <string name="r_added_karat">Titre du lingot ajouté</string>
+    <string name="r_add_weight">Poids du lingot à ajouter</string>
+    <string name="ingot_option">Lingot %1$d (titre %2$s)</string>
+    <string name="note_cut">Résultat théorique : il suppose que la partie coupée est affinée et que l\'or pur est entièrement récupéré.</string>
+    <string name="note_add">Résultat théorique : il dépend de la précision des poids et de la pureté du lingot ajouté.</string>
+
+    <string name="details_show">Afficher les détails</string>
+    <string name="details_hide">Masquer les détails</string>
+    <string name="d_theoretical_weight">Poids théorique</string>
+    <string name="d_practical_weight">Poids sur votre balance</string>
+    <string name="d_scale_precision">Précision de la balance</string>
+    <string name="d_actual_karat">Titre réel après arrondi</string>
+    <string name="d_deviation">Écart par rapport à l\'objectif</string>
+    <string name="d_group_gold">Or pur dans le groupe</string>
+    <string name="warn_deviation">L\'arrondi à la précision de votre balance éloigne le titre de l\'objectif de %1$s.</string>
+
+    <string name="cut_insufficient">Ce lingot est trop petit : il faut en couper %1$s g mais il ne pèse que %2$s g.</string>
+    <string name="cut_pure">Un lingot au titre 1000 ne contient aucune impureté à affiner. Choisissez un autre lingot.</string>
+
+    <string name="err_no_ingots">Saisissez au moins un lingot (poids et titre).</string>
+    <string name="err_row_incomplete">Le lingot %1$d est incomplet : saisissez le poids et le titre.</string>
+    <string name="err_invalid_weight">Les poids doivent être supérieurs à zéro.</string>
+    <string name="err_invalid_karat">Le titre doit être compris entre 0 et 1000.</string>
+    <string name="err_target_missing">Saisissez le titre visé.</string>
+    <string name="err_invalid_target">Le titre visé doit être supérieur à 0 et au plus 1000.</string>
+    <string name="err_added_karat_missing">Saisissez le titre du lingot à ajouter.</string>
+    <string name="err_invalid_added_karat">Le titre du lingot ajouté doit être compris entre 0 et 1000.</string>
+    <string name="err_target_equals_current">Le groupe a déjà le titre visé : aucun ajustement nécessaire.</string>
+    <string name="err_target_below_current">« Couper et affiner » ne peut qu\'augmenter le titre. Pour le baisser, utilisez « Ajouter un lingot » avec un titre plus bas.</string>
+    <string name="err_no_solution_same_karat">Le lingot ajouté a le même titre que l\'objectif : il ne peut jamais amener le groupe à l\'objectif. Choisissez un autre titre.</string>
+    <string name="err_wrong_direction">Ce titre ne rapproche pas le groupe de l\'objectif. Pour augmenter le titre, utilisez un titre supérieur à l\'objectif ; pour le baisser, un titre inférieur.</string>
+    <string name="err_cut_none">Couper dans un seul lingot est impossible : aucun lingot n\'est assez gros. Essayez plutôt d\'ajouter un lingot.</string>
+    <string name="err_generic">Le calcul est impossible avec ces valeurs.</string>
+
+    <string name="settings">Réglages</string>
+    <string name="clear_all">Tout effacer</string>
+    <string name="calculate">Calculer</string>
+    <string name="clear_confirm_title">Tout effacer ?</string>
+    <string name="clear_confirm_text">Les lingots, le titre visé et les résultats seront effacés. Les réglages et votre achat ne sont pas touchés.</string>
+    <string name="confirm_clear">Effacer</string>
+    <string name="cancel">Annuler</string>
+    <string name="copy_result">Copier</string>
+    <string name="share_result">Partager</string>
+    <string name="copied">Copié</string>
+    <string name="back">Retour</string>
+
+    <string name="share_group">Groupe : %1$s g, titre %2$s</string>
+    <string name="share_target">Titre visé : %1$s</string>
+    <string name="share_footer">Résultat théorique.</string>
+
+    <string name="settings_title">Réglages</string>
+    <string name="language">Langue</string>
+    <string name="appearance">Apparence</string>
+    <string name="theme_dark">Sombre</string>
+    <string name="theme_light">Clair</string>
+    <string name="theme_system">Système</string>
+    <string name="scale_precision">Précision de la balance</string>
+    <string name="scale_2">0,01 g</string>
+    <string name="scale_3">0,001 g</string>
+    <string name="scale_4">0,0001 g</string>
+
+    <string name="remove_ads_title">Supprimer les publicités</string>
+    <string name="remove_ads_desc">Utilisez Gold Calculateur sans publicité, pour toujours.</string>
+    <string name="remove_ads_button">Supprimer les pubs — %1$s</string>
+    <string name="remove_ads_loading">Chargement du prix depuis Google Play…</string>
+    <string name="remove_ads_done">Publicités supprimées. Merci pour votre soutien !</string>
+    <string name="restore_purchases">Restaurer les achats</string>
+    <string name="billing_pending">Votre paiement est en attente. Les publicités seront supprimées dès sa confirmation.</string>
+    <string name="billing_cancelled">Achat annulé.</string>
+    <string name="billing_network">Pas de connexion à Google Play. Réessayez plus tard.</string>
+    <string name="billing_unavailable">Les achats Google Play ne sont pas disponibles pour le moment.</string>
+    <string name="billing_error">L\'achat n\'a pas pu aboutir. Aucun montant n\'est débité pour un achat incomplet.</string>
+    <string name="billing_restored">Achats vérifiés.</string>
+    <string name="privacy_options">Choix de confidentialité des publicités</string>
+
+    <string name="history_title">Historique</string>
+    <string name="history_open">Historique</string>
+    <string name="history_empty">Aucun calcul pour le moment.</string>
+    <string name="history_clear">Effacer l\'historique</string>
+    <string name="history_mode_add">Ajouter un lingot</string>
+    <string name="history_mode_cut">Couper et affiner</string>
+    <string name="history_item">%1$s g → titre %2$s</string>
+    <string name="history_delete">Supprimer</string>
+
+    <string name="app_info">À propos</string>
+    <string name="version">Version</string>
+    <string name="privacy_policy">Politique de confidentialité</string>
+    <string name="terms">Conditions d\'utilisation</string>
+    <string name="contact">Nous contacter</string>
+    <string name="rate_app">Noter l\'application sur Google Play</string>
+    <string name="not_configured">Pas encore configuré</string>
+</resources>

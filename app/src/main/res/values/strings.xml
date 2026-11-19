@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- English (default / fallback) -->
+<resources>
+    <string name="app_name" translatable="false">Gold Calculateur</string>
+    <string name="tagline">Gold karat adjustment calculator</string>
+
+    <string name="col_ingot">Ingot</string>
+    <string name="col_weight">Weight (g)</string>
+    <string name="col_karat">Karat</string>
+    <string name="cd_delete_ingot">Delete ingot %1$d</string>
+    <string name="add_ingot_row">Add ingot</string>
+    <string name="hint_weight" translatable="false">0.000</string>
+    <string name="hint_karat" translatable="false">750</string>
+
+    <string name="summary_total_weight">Total weight</string>
+    <string name="summary_average_karat">Average karat</string>
+    <string name="target_karat">Target karat</string>
+    <string name="mode_cut">Cut &amp; refine</string>
+    <string name="mode_add">Add ingot</string>
+    <string name="added_karat">Karat of added ingot</string>
+
+    <string name="unit_g">g</string>
+    <string name="result_title">Result</string>
+    <string name="r_selected_ingot">Selected ingot</string>
+    <string name="r_cut_weight">Weight to cut</string>
+    <string name="r_recovered_gold">Pure gold recovered</string>
+    <string name="r_remaining_weight">Remaining weight of ingot</string>
+    <string name="r_final_weight">Final weight of the group</string>
+    <string name="r_final_karat">Final karat</string>
+    <string name="r_added_karat">Karat of added ingot</string>
+    <string name="r_add_weight">Weight of ingot to add</string>
+    <string name="ingot_option">Ingot %1$d (karat %2$s)</string>
+    <string name="note_cut">Theoretical result: it assumes the cut part is refined and the pure gold is fully recovered.</string>
+    <string name="note_add">Theoretical result: it depends on the accuracy of the weights and the purity of the added ingot.</string>
+
+    <string name="details_show">Show details</string>
+    <string name="details_hide">Hide details</string>
+    <string name="d_theoretical_weight">Theoretical weight</string>
+    <string name="d_practical_weight">Weight on your scale</string>
+    <string name="d_scale_precision">Scale precision</string>
+    <string name="d_actual_karat">Actual karat after rounding</string>
+    <string name="d_deviation">Difference from target</string>
+    <string name="d_group_gold">Pure gold in the group</string>
+    <string name="warn_deviation">Rounding to your scale moves the karat away from the target by %1$s.</string>
+
+    <string name="cut_insufficient">This ingot is too small: it needs a cut of %1$s g but weighs only %2$s g.</string>
+    <string name="cut_pure">A karat-1000 ingot contains no impurities to refine away. Choose another ingot.</string>
+
+    <string name="err_no_ingots">Enter at least one ingot (weight and karat).</string>
+    <string name="err_row_incomplete">Ingot %1$d is incomplete: enter both weight and karat.</string>
+    <string name="err_invalid_weight">Weights must be greater than zero.</string>
+    <string name="err_invalid_karat">Karat must be between 0 and 1000.</string>
+    <string name="err_target_missing">Enter the target karat.</string>
+    <string name="err_invalid_target">The target karat must be greater than 0 and at most 1000.</string>
+    <string name="err_added_karat_missing">Enter the karat of the ingot to add.</string>
+    <string name="err_invalid_added_karat">The added ingot karat must be between 0 and 1000.</string>
+    <string name="err_target_equals_current">The group already has the target karat: no adjustment needed.</string>
+    <string name="err_target_below_current">Cut &amp; refine can only raise the karat. To lower it, use \"Add ingot\" with a lower-karat ingot.</string>
+    <string name="err_no_solution_same_karat">The added ingot has the same karat as the target, so it can never move the group to the target. Choose a different karat.</string>
+    <string name="err_wrong_direction">This added karat cannot move the group toward the target. To raise the karat use a higher karat than the target; to lower it use a lower one.</string>
+    <string name="err_cut_none">Cutting from a single ingot is not possible: no ingot is large enough. Try adding an ingot instead.</string>
+    <string name="err_generic">The calculation is not possible with these values.</string>
+
+    <string name="settings">Settings</string>
+    <string name="clear_all">Clear all</string>
+    <string name="calculate">Calculate</string>
+    <string name="clear_confirm_title">Clear everything?</string>
+    <string name="clear_confirm_text">Ingots, target karat and results will be cleared. Settings and your purchase are not affected.</string>
+    <string name="confirm_clear">Clear</string>
+    <string name="cancel">Cancel</string>
+    <string name="copy_result">Copy</string>
+    <string name="share_result">Share</string>
+    <string name="copied">Copied</string>
+    <string name="back">Back</string>
+
+    <string name="share_header" translatable="false">Gold Calculateur</string>
+    <string name="share_group">Group: %1$s g, karat %2$s</string>
+    <string name="share_target">Target karat: %1$s</string>
+    <string name="share_footer">Theoretical result.</string>
+
+    <string name="settings_title">Settings</string>
+    <string name="language">Language</string>
+    <string name="lang_ar" translatable="false">العربية</string>
+    <string name="lang_fr" translatable="false">Français</string>
+    <string name="lang_en" translatable="false">English</string>
+    <string name="appearance">Appearance</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_system">System</string>
+    <string name="scale_precision">Scale precision</string>
+    <string name="scale_2">0.01 g</string>
+    <string name="scale_3">0.001 g</string>
+    <string name="scale_4">0.0001 g</string>
+
+    <string name="remove_ads_title">Remove ads</string>
+    <string name="remove_ads_desc">Use Gold Calculateur without ads, forever.</string>
+    <string name="remove_ads_button">Remove ads — %1$s</string>
+    <string name="remove_ads_loading">Loading the price from Google Play…</string>
+    <string name="remove_ads_done">Ads removed. Thank you for your support!</string>
+    <string name="restore_purchases">Restore purchases</string>
+    <string name="billing_pending">Your payment is pending. Ads will be removed once it is confirmed.</string>
+    <string name="billing_cancelled">Purchase cancelled.</string>
+    <string name="billing_network">No connection to Google Play. Please try again later.</string>
+    <string name="billing_unavailable">Google Play purchases are not available right now.</string>
+    <string name="billing_error">The purchase could not be completed. You were not charged for an incomplete purchase.</string>
+    <string name="billing_restored">Purchases checked.</string>
+    <string name="privacy_options">Ad privacy choices</string>
+
+    <string name="history_title">History</string>
+    <string name="history_open">History</string>
+    <string name="history_empty">No calculations yet.</string>
+    <string name="history_clear">Clear history</string>
+    <string name="history_mode_add">Add ingot</string>
+    <string name="history_mode_cut">Cut &amp; refine</string>
+    <string name="history_item">%1$s g → karat %2$s</string>
+    <string name="history_delete">Delete</string>
+
+    <string name="app_info">About the app</string>
+    <string name="version">Version</string>
+    <string name="privacy_policy">Privacy policy</string>
+    <string name="terms">Terms of use</string>
+    <string name="contact">Contact us</string>
+    <string name="rate_app">Rate the app on Google Play</string>
+    <string name="not_configured">Not configured yet</string>
+</resources>

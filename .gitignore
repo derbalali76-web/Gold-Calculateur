@@ -1,0 +1,24 @@
+# Gradle / Android
+.gradle/
+build/
+*/build/
+local.properties
+.idea/
+*.iml
+captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# NEVER commit signing material or secrets
+*.jks
+*.keystore
+*.p12
+*.pem
+keystore.properties
+google-services.json
+secrets.properties
+.env

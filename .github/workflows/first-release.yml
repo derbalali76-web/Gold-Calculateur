@@ -1,0 +1,76 @@
+name: Build signed AAB + APK (manual)
+
+# Builds a SIGNED release AAB (for Google Play) and APK (for direct install) with the real AdMob ids.
+# Keystore: uses secret RELEASE_KEYSTORE_BASE64 (+ RELEASE_STORE_PASSWORD, RELEASE_KEY_ALIAS,
+# RELEASE_KEY_PASSWORD) if present. Otherwise it GENERATES an upload keystore and uploads it
+# ENCRYPTED (AES-256) with the secret KEYSTORE_BACKUP_PASSPHRASE, which you must create first.
+# Keep that keystore forever: you need the same one for every future update.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      HAVE_KEYSTORE: ${{ secrets.RELEASE_KEYSTORE_BASE64 != '' }}
+      BACKUP_PASS: ${{ secrets.KEYSTORE_BACKUP_PASSPHRASE }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+      - run: chmod +x gradlew
+
+      - name: Prepare keystore
+        run: |
+          if [ "$HAVE_KEYSTORE" = "true" ]; then
+            echo "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/upload-keystore.jks"
+            echo "STORE_PASS=${{ secrets.RELEASE_STORE_PASSWORD }}" >> "$GITHUB_ENV"
+            echo "KEY_ALIAS=${{ secrets.RELEASE_KEY_ALIAS }}" >> "$GITHUB_ENV"
+            echo "KEY_PASS=${{ secrets.RELEASE_KEY_PASSWORD }}" >> "$GITHUB_ENV"
+          else
+            if [ -z "$BACKUP_PASS" ]; then
+              echo "::error::No keystore secret found. Add a repository secret KEYSTORE_BACKUP_PASSPHRASE (any strong password) so the generated keystore can be saved encrypted, then re-run."
+              exit 1
+            fi
+            P=$(openssl rand -hex 16)
+            echo "::add-mask::$P"
+            keytool -genkeypair -v -keystore "$RUNNER_TEMP/upload-keystore.jks" -storetype PKCS12 \
+              -alias upload -keyalg RSA -keysize 2048 -validity 10000 \
+              -storepass "$P" -keypass "$P" -dname "CN=Gold Calculateur, O=Gold Calculateur, C=DZ"
+            echo "STORE_PASS=$P" >> "$GITHUB_ENV"
+            echo "KEY_ALIAS=upload" >> "$GITHUB_ENV"
+            echo "KEY_PASS=$P" >> "$GITHUB_ENV"
+            mkdir -p keystore-backup
+            printf 'alias=upload\nstorePassword=%s\nkeyPassword=%s\n' "$P" "$P" > "$RUNNER_TEMP/keystore-info.txt"
+            tar -C "$RUNNER_TEMP" -czf "$RUNNER_TEMP/keystore.tgz" upload-keystore.jks keystore-info.txt
+            openssl enc -aes-256-cbc -pbkdf2 -salt -pass env:BACKUP_PASS -in "$RUNNER_TEMP/keystore.tgz" -out keystore-backup/keystore.tgz.enc
+          fi
+
+      - name: Test and build
+        env:
+          RELEASE_STORE_FILE: ${{ runner.temp }}/upload-keystore.jks
+          PRIVACY_POLICY_URL: ${{ secrets.PRIVACY_POLICY_URL }}
+          TERMS_URL: ${{ secrets.TERMS_URL }}
+          CONTACT_EMAIL: ${{ secrets.CONTACT_EMAIL }}
+        run: |
+          export RELEASE_STORE_PASSWORD="$STORE_PASS" RELEASE_KEY_ALIAS="$KEY_ALIAS" RELEASE_KEY_PASSWORD="$KEY_PASS"
+          ./gradlew :engine:test :app:testDebugUnitTest :app:bundleRelease :app:assembleRelease --stacktrace
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gold-calculateur-release-aab
+          path: app/build/outputs/bundle/release/*.aab
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gold-calculateur-release-apk
+          path: app/build/outputs/apk/release/*.apk
+      - uses: actions/upload-artifact@v4
+        if: env.HAVE_KEYSTORE != 'true'
+        with:
+          name: keystore-ENCRYPTED-keep-forever
+          path: keystore-backup/keystore.tgz.enc

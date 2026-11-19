@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tagline">حاسبة تعديل عيار الذهب</string>
+
+    <string name="col_ingot">السبيكة</string>
+    <string name="col_weight">الوزن (غ)</string>
+    <string name="col_karat">العيار</string>
+    <string name="cd_delete_ingot">حذف السبيكة %1$d</string>
+    <string name="add_ingot_row">إضافة سبيكة</string>
+
+    <string name="summary_total_weight">الوزن الإجمالي</string>
+    <string name="summary_average_karat">العيار المتوسط</string>
+    <string name="target_karat">العيار المستهدف</string>
+    <string name="mode_cut">قص وتنقية</string>
+    <string name="mode_add">إضافة سبيكة</string>
+    <string name="added_karat">عيار السبيكة المضافة</string>
+
+    <string name="unit_g">غ</string>
+    <string name="result_title">نتيجة الحساب</string>
+    <string name="r_selected_ingot">السبيكة المختارة</string>
+    <string name="r_cut_weight">وزن الجزء المطلوب قصه</string>
+    <string name="r_recovered_gold">الذهب الخالص المسترجع</string>
+    <string name="r_remaining_weight">الوزن المتبقي من السبيكة</string>
+    <string name="r_final_weight">الوزن النهائي للمجموعة</string>
+    <string name="r_final_karat">العيار النهائي</string>
+    <string name="r_added_karat">عيار السبيكة المضافة</string>
+    <string name="r_add_weight">وزن السبيكة المطلوب إضافتها</string>
+    <string name="ingot_option">السبيكة %1$d (عيار %2$s)</string>
+    <string name="note_cut">النتيجة نظرية وتعتمد على كفاءة التنقية واسترجاع الذهب بالكامل.</string>
+    <string name="note_add">النتيجة نظرية وتعتمد على دقة الأوزان ونقاء السبيكة المضافة.</string>
+
+    <string name="details_show">عرض التفاصيل</string>
+    <string name="details_hide">إخفاء التفاصيل</string>
+    <string name="d_theoretical_weight">الوزن النظري</string>
+    <string name="d_practical_weight">الوزن على ميزانك</string>
+    <string name="d_scale_precision">دقة الميزان</string>
+    <string name="d_actual_karat">العيار الفعلي بعد التقريب</string>
+    <string name="d_deviation">الفرق عن الهدف</string>
+    <string name="d_group_gold">الذهب الخالص في المجموعة</string>
+    <string name="warn_deviation">التقريب حسب دقة ميزانك يبعد العيار عن الهدف بمقدار %1$s.</string>
+
+    <string name="cut_insufficient">هذه السبيكة غير كافية: تحتاج قص %1$s غ ووزنها %2$s غ فقط.</string>
+    <string name="cut_pure">سبيكة عيار 1000 لا تحتوي شوائب لتنقيتها. اختر سبيكة أخرى.</string>
+
+    <string name="err_no_ingots">أدخل سبيكة واحدة على الأقل (الوزن والعيار).</string>
+    <string name="err_row_incomplete">السبيكة %1$d غير مكتملة: أدخل الوزن والعيار معاً.</string>
+    <string name="err_invalid_weight">يجب أن يكون الوزن أكبر من صفر.</string>
+    <string name="err_invalid_karat">يجب أن يكون العيار بين 0 و1000.</string>
+    <string name="err_target_missing">أدخل العيار المستهدف.</string>
+    <string name="err_invalid_target">يجب أن يكون العيار المستهدف أكبر من 0 ولا يتجاوز 1000.</string>
+    <string name="err_added_karat_missing">أدخل عيار السبيكة المضافة.</string>
+    <string name="err_invalid_added_karat">يجب أن يكون عيار السبيكة المضافة بين 0 و1000.</string>
+    <string name="err_target_equals_current">المجموعة بالعيار المطلوب أصلاً: لا حاجة إلى تعديل.</string>
+    <string name="err_target_below_current">«قص وتنقية» ترفع العيار فقط. لخفضه استخدم «إضافة سبيكة» بعيار أقل.</string>
+    <string name="err_no_solution_same_karat">عيار السبيكة المضافة يساوي العيار المستهدف، فلا يمكنها أن تقرّب المجموعة من الهدف. اختر عياراً مختلفاً.</string>
+    <string name="err_wrong_direction">هذا العيار لا يقرّب المجموعة من الهدف. لرفع العيار استخدم عياراً أعلى من الهدف، ولخفضه استخدم عياراً أقل منه.</string>
+    <string name="err_cut_none">القص من سبيكة واحدة غير ممكن: لا توجد سبيكة كافية. جرّب إضافة سبيكة بدلاً من ذلك.</string>
+    <string name="err_generic">الحساب غير ممكن بهذه القيم.</string>
+
+    <string name="settings">الإعدادات</string>
+    <string name="clear_all">مسح الكل</string>
+    <string name="calculate">احسب</string>
+    <string name="clear_confirm_title">مسح الكل؟</string>
+    <string name="clear_confirm_text">سيتم مسح السبائك والعيار المستهدف والنتائج. لن تتأثر الإعدادات ولا حالة الشراء.</string>
+    <string name="confirm_clear">مسح</string>
+    <string name="cancel">إلغاء</string>
+    <string name="copy_result">نسخ</string>
+    <string name="share_result">مشاركة</string>
+    <string name="copied">تم النسخ</string>
+    <string name="back">رجوع</string>
+
+    <string name="share_group">المجموعة: %1$s غ، العيار %2$s</string>
+    <string name="share_target">العيار المستهدف: %1$s</string>
+    <string name="share_footer">نتيجة نظرية.</string>
+
+    <string name="settings_title">الإعدادات</string>
+    <string name="language">اللغة</string>
+    <string name="appearance">المظهر</string>
+    <string name="theme_dark">داكن</string>
+    <string name="theme_light">فاتح</string>
+    <string name="theme_system">حسب النظام</string>
+    <string name="scale_precision">دقة الميزان</string>
+    <string name="scale_2">0.01 غ</string>
+    <string name="scale_3">0.001 غ</string>
+    <string name="scale_4">0.0001 غ</string>
+
+    <string name="remove_ads_title">إزالة الإعلانات</string>
+    <string name="remove_ads_desc">استخدم Gold Calculateur دون إعلانات نهائياً.</string>
+    <string name="remove_ads_button">إزالة الإعلانات — %1$s</string>
+    <string name="remove_ads_loading">جارٍ تحميل السعر من Google Play…</string>
+    <string name="remove_ads_done">تمت إزالة الإعلانات. شكراً لدعمك!</string>
+    <string name="restore_purchases">استعادة المشتريات</string>
+    <string name="billing_pending">الدفع قيد الانتظار. ستُزال الإعلانات بمجرد تأكيده.</string>
+    <string name="billing_cancelled">تم إلغاء الشراء.</string>
+    <string name="billing_network">لا يوجد اتصال بـ Google Play. حاول لاحقاً.</string>
+    <string name="billing_unavailable">مشتريات Google Play غير متاحة حالياً.</string>
+    <string name="billing_error">تعذّر إتمام الشراء. لن يُحتسب عليك مبلغ لعملية غير مكتملة.</string>
+    <string name="billing_restored">تم التحقق من المشتريات.</string>
+    <string name="privacy_options">خيارات خصوصية الإعلانات</string>
+
+    <string name="history_title">سجل العمليات</string>
+    <string name="history_open">سجل العمليات</string>
+    <string name="history_empty">لا توجد عمليات حساب بعد.</string>
+    <string name="history_clear">مسح السجل</string>
+    <string name="history_mode_add">إضافة سبيكة</string>
+    <string name="history_mode_cut">قص وتنقية</string>
+    <string name="history_item">%1$s غ ← عيار %2$s</string>
+    <string name="history_delete">حذف</string>
+
+    <string name="app_info">معلومات التطبيق</string>
+    <string name="version">الإصدار</string>
+    <string name="privacy_policy">سياسة الخصوصية</string>
+    <string name="terms">شروط الاستخدام</string>
+    <string name="contact">تواصل معنا</string>
+    <string name="rate_app">تقييم التطبيق على Google Play</string>
+    <string name="not_configured">غير مضبوط بعد</string>
+</resources>
