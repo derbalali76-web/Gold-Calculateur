@@ -59,3 +59,4 @@ class ScreenshotTest {
     @Test fun addMode() = shot("shot_add", CalcMode.ADD_INGOT)
     @Test fun cutMode() = shot("shot_cut", CalcMode.CUT_REFINE)
 }
+// screenshot trigger
