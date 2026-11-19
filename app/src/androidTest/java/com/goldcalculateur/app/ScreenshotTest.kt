@@ -60,3 +60,4 @@ class ScreenshotTest {
     @Test fun cutMode() = shot("shot_cut", CalcMode.CUT_REFINE)
 }
 // screenshot trigger
+// retry
