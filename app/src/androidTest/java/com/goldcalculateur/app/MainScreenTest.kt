@@ -146,7 +146,7 @@ class MainScreenTest {
 
     @Test fun addedKaratChipsAreOnlyInAddMode() {
         rule.setContent { Screen(stateFor(work(CalcMode.CUT_REFINE), calculated = false)) }
-        rule.onNodeWithTag("chip_917").assertDoesNotExist()
+        rule.onNodeWithTag("chip_875").assertDoesNotExist()
     }
 
     @Test fun quickKaratChipChangesTheFieldInPlace() {
@@ -154,8 +154,8 @@ class MainScreenTest {
         rule.setContent {
             Screen(stateFor(work(CalcMode.ADD_INGOT), calculated = false), MainActions(onAddedKaratChange = { karat = it }))
         }
-        rule.onNodeWithTag("chip_917").performClick()
-        assertEquals("917", karat)
+        rule.onNodeWithTag("chip_875").performClick()
+        assertEquals("875", karat)
     }
 
     @Test fun typingInACellReportsTheChange() {

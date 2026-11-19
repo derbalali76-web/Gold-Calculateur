@@ -2,9 +2,9 @@
 <resources>
     <string name="tagline">حاسبة تعديل عيار الذهب</string>
 
-    <string name="col_ingot">السبيكة</string>
-    <string name="col_weight">الوزن (غ)</string>
-    <string name="col_karat">العيار</string>
+    <string name="col_ingot">#</string>
+    <string name="col_weight">وزن السبيكة (غ)</string>
+    <string name="col_karat">عيار السبيكة</string>
     <string name="cd_delete_ingot">حذف السبيكة %1$d</string>
     <string name="add_ingot_row">إضافة سبيكة</string>
 
