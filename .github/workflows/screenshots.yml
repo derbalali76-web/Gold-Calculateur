@@ -39,7 +39,9 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           script: |
             ./gradlew :app:installDebug :app:installDebugAndroidTest --stacktrace
-            adb shell am instrument -w -e class com.goldcalculateur.app.ScreenshotTest com.goldcalculateur.app.test/androidx.test.runner.AndroidJUnitRunner
+            adb shell am instrument -w -e class com.goldcalculateur.app.ScreenshotTest com.goldcalculateur.app.test/androidx.test.runner.AndroidJUnitRunner > instr.txt 2>&1 || true
+            cat instr.txt
+            adb logcat -d -t 300 AndroidRuntime:E TestRunner:I *:S || true
             mkdir -p shots
             adb pull /sdcard/Android/data/com.goldcalculateur.app/files/. shots/
       - name: Publish to previews branch
