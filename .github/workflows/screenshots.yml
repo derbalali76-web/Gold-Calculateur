@@ -1,0 +1,49 @@
+name: UI screenshots (emulator)
+
+# Renders the real screen on an emulator and publishes PNGs to the `previews` branch for review.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['app/src/**']
+
+permissions:
+  contents: write
+
+jobs:
+  shots:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+      - run: chmod +x gradlew
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Render screenshots
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          profile: pixel_5
+          script: |
+            ./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.goldcalculateur.app.ScreenshotTest --stacktrace
+            mkdir -p shots
+            adb pull /sdcard/Android/data/com.goldcalculateur.app/files/. shots/
+      - name: Publish to previews branch
+        if: always()
+        run: |
+          ls -la shots || exit 0
+          cd shots
+          git init -q -b previews
+          git config user.email "ci@users.noreply.github.com"; git config user.name "ci"
+          git add -A; git commit -q -m "screenshots for ${{ github.sha }}"
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" previews
