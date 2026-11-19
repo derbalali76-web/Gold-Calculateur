@@ -35,7 +35,8 @@ jobs:
           arch: x86_64
           profile: pixel_5
           script: |
-            ./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.goldcalculateur.app.ScreenshotTest --stacktrace
+            ./gradlew :app:installDebug :app:installDebugAndroidTest --stacktrace
+            adb shell am instrument -w -e class com.goldcalculateur.app.ScreenshotTest com.goldcalculateur.app.test/androidx.test.runner.AndroidJUnitRunner
             mkdir -p shots
             adb pull /sdcard/Android/data/com.goldcalculateur.app/files/. shots/
       - name: Publish to previews branch
