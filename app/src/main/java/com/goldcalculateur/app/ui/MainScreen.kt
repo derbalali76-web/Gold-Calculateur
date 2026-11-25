@@ -496,11 +496,11 @@ private fun BottomBar(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 BarButton(
-                    icon = Icons.Filled.Settings, label = stringResource(R.string.settings),
+                    art = R.drawable.art_ic_gear, label = stringResource(R.string.settings),
                     onClick = onSettings, modifier = Modifier.weight(224f).testTag("open_settings"),
                 )
                 BarButton(
-                    icon = Icons.Filled.Delete, label = stringResource(R.string.clear_all),
+                    art = R.drawable.art_ic_trash, label = stringResource(R.string.clear_all),
                     onClick = onClear, modifier = Modifier.weight(278f).testTag("clear_all"),
                 )
                 GoldButton(
@@ -532,7 +532,7 @@ private fun BottomBar(
 }
 
 @Composable
-private fun BarButton(icon: ImageVector, label: String, onClick: () -> Unit, modifier: Modifier) {
+private fun BarButton(art: Int, label: String, onClick: () -> Unit, modifier: Modifier) {
     val shape = RoundedCornerShape(28.px())
     Column(
         modifier
@@ -543,7 +543,7 @@ private fun BarButton(icon: ImageVector, label: String, onClick: () -> Unit, mod
             .clickable(role = Role.Button, onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center,
     ) {
-        Icon(icon, contentDescription = null, tint = MaterialTheme.extra.goldText, modifier = Modifier.size(48.px()))
+        Image(painterResource(art), contentDescription = null, modifier = Modifier.size(54.px()))
         Text(label, color = Look.Cream, fontSize = 26.spx(), maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }
