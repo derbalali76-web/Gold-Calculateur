@@ -13,8 +13,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material3.Icon
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -131,17 +131,16 @@ fun KaratStepper(value: String, onChange: (String) -> Unit, base: Int, modifier:
     val shape = RoundedCornerShape(10.dp)
     Column(
         modifier = modifier
-            .width(40.dp)
             .clip(shape)
             .background(Look.FieldBg)
             .border(1.dp, Look.FieldBorder, shape),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Box(Modifier.fillMaxWidth().weight(1f).clickable { step(1) }, contentAlignment = Alignment.Center) {
-            Icon(Icons.Filled.KeyboardArrowUp, contentDescription = null, tint = Color(0xFFF5C02B))
+            Icon(Icons.Filled.ArrowDropUp, contentDescription = null, tint = Color(0xFFF5C02B), modifier = Modifier.size(34.px()))
         }
         Box(Modifier.fillMaxWidth().weight(1f).clickable { step(-1) }, contentAlignment = Alignment.Center) {
-            Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null, tint = Color(0xFFF5C02B))
+            Icon(Icons.Filled.ArrowDropDown, contentDescription = null, tint = Color(0xFFF5C02B), modifier = Modifier.size(34.px()))
         }
     }
 }

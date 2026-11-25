@@ -336,8 +336,11 @@ private fun MessageBox(text: String, isError: Boolean, tag: String) {
 @Composable
 private fun Details(rows: List<Pair<String, String>>) {
     var expanded by rememberSaveable { mutableStateOf(false) }
-    TextButton(onClick = { expanded = !expanded }, modifier = Modifier.testTag("toggle_details")) {
-        Text(stringResource(if (expanded) R.string.details_hide else R.string.details_show), color = MaterialTheme.extra.goldText)
+    Row(
+        Modifier.clip(RoundedCornerShape(8.dp)).clickable { expanded = !expanded }.padding(vertical = 6.dp, horizontal = 4.dp).testTag("toggle_details"),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(stringResource(if (expanded) R.string.details_hide else R.string.details_show), color = MaterialTheme.extra.goldText, fontSize = 24.spx())
         Icon(
             if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
             contentDescription = null, tint = MaterialTheme.extra.goldText,
@@ -370,8 +373,11 @@ private fun Note(text: String) {
 
 @Composable
 private fun IconTextButton(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, onClick: () -> Unit, tag: String) {
-    TextButton(onClick = onClick, modifier = Modifier.testTag(tag), contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp)) {
-        Icon(icon, contentDescription = label, tint = MaterialTheme.extra.goldText, modifier = Modifier.size(20.dp))
+    Box(
+        Modifier.size(36.dp).clip(RoundedCornerShape(10.dp)).clickable(onClick = onClick).testTag(tag),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(icon, contentDescription = label, tint = MaterialTheme.extra.goldText, modifier = Modifier.size(18.dp))
     }
 }
 
