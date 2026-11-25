@@ -1,13 +1,9 @@
 name: Release - signed AAB + APK (manual)
 
-# ONE release workflow (replaces release-bundle.yml and first-release.yml).
-# - Real AdMob ids come from gradle.properties (or secrets ADMOB_* if you set them). Debug builds use test ids only.
-# - Signing: uses the repository secrets RELEASE_KEYSTORE_BASE64, RELEASE_STORE_PASSWORD,
-#   RELEASE_KEY_ALIAS, RELEASE_KEY_PASSWORD. The existing key is NEVER replaced.
-#   Only if RELEASE_KEYSTORE_BASE64 is absent (first ever release) a new upload key is generated and
-#   uploaded ENCRYPTED with secret KEYSTORE_BACKUP_PASSPHRASE. A key generated that way is only
-#   valid if you then store it in the secrets; otherwise every run makes a different key.
-# - The build is blocked (Gradle verifyReleaseConfig) with Google test ids / malformed ids / missing signing.
+# ONE release workflow. Always signs with the permanent key stored in repository secrets
+# (RELEASE_KEYSTORE_BASE64, RELEASE_STORE_PASSWORD, RELEASE_KEY_ALIAS, RELEASE_KEY_PASSWORD), created once by
+# 'Create signing key (run once)'. versionCode = this workflow's run number, so every new build installs
+# over the previous one. The build is blocked by Gradle (verifyReleaseConfig) with Google test ad ids.
 
 on:
   workflow_dispatch:
@@ -29,7 +25,6 @@ jobs:
       SECRET_STORE_PASS: ${{ secrets.RELEASE_STORE_PASSWORD }}
       SECRET_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
       SECRET_KEY_PASS: ${{ secrets.RELEASE_KEY_PASSWORD }}
-      BACKUP_PASS: ${{ secrets.KEYSTORE_BACKUP_PASSPHRASE }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -39,40 +34,25 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - run: chmod +x gradlew
 
-      - name: Prepare signing key
+      - name: Prepare signing key (the ONE permanent key from repository secrets)
         run: |
-          if [ "$HAVE_KEYSTORE" = "true" ]; then
-            if [ -z "$SECRET_STORE_PASS" ] || [ -z "$SECRET_KEY_ALIAS" ] || [ -z "$SECRET_KEY_PASS" ]; then
-              echo "::error::RELEASE_KEYSTORE_BASE64 is set but RELEASE_STORE_PASSWORD / RELEASE_KEY_ALIAS / RELEASE_KEY_PASSWORD is missing."
-              exit 1
-            fi
-            printf '%s' "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/upload-keystore.jks"
-            echo "STORE_PASS=$SECRET_STORE_PASS" >> "$GITHUB_ENV"
-            echo "KEY_ALIAS=$SECRET_KEY_ALIAS" >> "$GITHUB_ENV"
-            echo "KEY_PASS=$SECRET_KEY_PASS" >> "$GITHUB_ENV"
-          else
-            if [ -z "$BACKUP_PASS" ]; then
-              echo "::error::No keystore secret found. Create secret KEYSTORE_BACKUP_PASSPHRASE (a strong password) so the new upload key can be saved encrypted, then re-run."
-              exit 1
-            fi
-            P=$(openssl rand -hex 16)
-            echo "::add-mask::$P"
-            keytool -genkeypair -keystore "$RUNNER_TEMP/upload-keystore.jks" -storetype PKCS12 \
-              -alias upload -keyalg RSA -keysize 2048 -validity 10000 \
-              -storepass "$P" -keypass "$P" -dname "CN=Gold Calculateur, O=Gold Calculateur, C=DZ"
-            echo "STORE_PASS=$P" >> "$GITHUB_ENV"
-            echo "KEY_ALIAS=upload" >> "$GITHUB_ENV"
-            echo "KEY_PASS=$P" >> "$GITHUB_ENV"
-            mkdir -p keystore-backup
-            printf 'alias=upload\nstorePassword=%s\nkeyPassword=%s\n' "$P" "$P" > "$RUNNER_TEMP/keystore-info.txt"
-            tar -C "$RUNNER_TEMP" -czf "$RUNNER_TEMP/keystore.tgz" upload-keystore.jks keystore-info.txt
-            openssl enc -aes-256-cbc -pbkdf2 -salt -pass env:BACKUP_PASS -in "$RUNNER_TEMP/keystore.tgz" -out keystore-backup/keystore.tgz.enc
-            echo "::warning::A NEW upload key was generated. Download 'keystore-ENCRYPTED-keep-forever' and store the key in repository secrets before publishing to Google Play."
+          if [ "$HAVE_KEYSTORE" != "true" ]; then
+            echo "::error::No permanent signing key yet. Run the workflow 'Create signing key (run once)' first. Builds signed with a different key cannot update an installed app."
+            exit 1
           fi
+          if [ -z "$SECRET_STORE_PASS" ] || [ -z "$SECRET_KEY_ALIAS" ] || [ -z "$SECRET_KEY_PASS" ]; then
+            echo "::error::RELEASE_KEYSTORE_BASE64 is set but RELEASE_STORE_PASSWORD / RELEASE_KEY_ALIAS / RELEASE_KEY_PASSWORD is missing."
+            exit 1
+          fi
+          printf '%s' "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/upload-keystore.jks"
+          echo "STORE_PASS=$SECRET_STORE_PASS" >> "$GITHUB_ENV"
+          echo "KEY_ALIAS=$SECRET_KEY_ALIAS" >> "$GITHUB_ENV"
+          echo "KEY_PASS=$SECRET_KEY_PASS" >> "$GITHUB_ENV"
 
       - name: Test and build (release guard blocks test ad ids)
         env:
           RELEASE_STORE_FILE: ${{ runner.temp }}/upload-keystore.jks
+          VERSION_CODE: ${{ github.run_number }}
           ADMOB_APP_ID: ${{ secrets.ADMOB_APP_ID }}
           ADMOB_BANNER_UNIT_ID: ${{ secrets.ADMOB_BANNER_UNIT_ID }}
           ADMOB_INTERSTITIAL_UNIT_ID: ${{ secrets.ADMOB_INTERSTITIAL_UNIT_ID }}
@@ -96,8 +76,3 @@ jobs:
         with:
           name: gold-calculateur-release-apk
           path: app/build/outputs/apk/release/*.apk
-      - uses: actions/upload-artifact@v4
-        if: env.HAVE_KEYSTORE != 'true'
-        with:
-          name: keystore-ENCRYPTED-keep-forever
-          path: keystore-backup/keystore.tgz.enc

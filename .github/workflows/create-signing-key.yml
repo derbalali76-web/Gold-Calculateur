@@ -1,0 +1,63 @@
+name: Create signing key (run once)
+
+# Creates the ONE permanent signing key and stores it directly in repository secrets, so the key is never
+# shown or downloadable. It REFUSES to run if a key already exists (it never replaces an existing key).
+#
+# Before running, create a fine-grained personal access token (GitHub > Settings > Developer settings >
+# Fine-grained tokens) limited to THIS repository with "Secrets: Read and write", and save it as the
+# repository secret SECRETS_ADMIN_TOKEN. Delete the token after the key is created.
+# Optional: secret KEYSTORE_BACKUP_PASSPHRASE adds an AES-encrypted backup artifact.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  create:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      HAVE_KEYSTORE: ${{ secrets.RELEASE_KEYSTORE_BASE64 != '' }}
+      GH_TOKEN: ${{ secrets.SECRETS_ADMIN_TOKEN }}
+      BACKUP_PASS: ${{ secrets.KEYSTORE_BACKUP_PASSPHRASE }}
+    steps:
+      - name: Refuse if a key already exists or the token is missing
+        run: |
+          if [ "$HAVE_KEYSTORE" = "true" ]; then
+            echo "::error::A signing key already exists in the secrets. Refusing to replace it."
+            exit 1
+          fi
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::error::Create the secret SECRETS_ADMIN_TOKEN first (see the comment at the top of this workflow)."
+            exit 1
+          fi
+
+      - name: Generate the key and store it in repository secrets
+        run: |
+          P=$(openssl rand -hex 20)
+          echo "::add-mask::$P"
+          keytool -genkeypair -keystore "$RUNNER_TEMP/upload-keystore.jks" -storetype PKCS12 \
+            -alias upload -keyalg RSA -keysize 2048 -validity 10000 \
+            -storepass "$P" -keypass "$P" -dname "CN=Gold Calculateur, O=Gold Calculateur, C=DZ"
+          B64=$(base64 -w0 "$RUNNER_TEMP/upload-keystore.jks")
+          echo "::add-mask::$B64"
+          REPO="${{ github.repository }}"
+          gh secret set RELEASE_STORE_PASSWORD --repo "$REPO" --body "$P"
+          gh secret set RELEASE_KEY_ALIAS --repo "$REPO" --body "upload"
+          gh secret set RELEASE_KEY_PASSWORD --repo "$REPO" --body "$P"
+          gh secret set RELEASE_KEYSTORE_BASE64 --repo "$REPO" --body "$B64"
+          if [ -n "$BACKUP_PASS" ]; then
+            mkdir -p keystore-backup
+            printf 'alias=upload\nstorePassword=%s\nkeyPassword=%s\n' "$P" "$P" > "$RUNNER_TEMP/keystore-info.txt"
+            tar -C "$RUNNER_TEMP" -czf "$RUNNER_TEMP/keystore.tgz" upload-keystore.jks keystore-info.txt
+            openssl enc -aes-256-cbc -pbkdf2 -salt -pass env:BACKUP_PASS -in "$RUNNER_TEMP/keystore.tgz" -out keystore-backup/keystore.tgz.enc
+          fi
+          echo "Signing key created and stored in repository secrets."
+
+      - uses: actions/upload-artifact@v4
+        if: env.BACKUP_PASS != ''
+        with:
+          name: keystore-ENCRYPTED-keep-forever
+          path: keystore-backup/keystore.tgz.enc

@@ -24,8 +24,10 @@ android {
         applicationId = "com.goldcalculateur.app"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0.0"
+        // Each release build gets a higher versionCode (VERSION_CODE from CI) so it installs OVER the old app.
+        val code = prop("VERSION_CODE")?.toIntOrNull() ?: 1
+        versionCode = code
+        versionName = "1.0.$code"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // ---- Ad / billing policy knobs (change here, the calculation engine is untouched) ----
