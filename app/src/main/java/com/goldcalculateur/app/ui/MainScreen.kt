@@ -518,7 +518,8 @@ private fun BottomBar(
         }
         // The ad slot: the real AdMob adaptive banner inside the mockup's gold frame.
         if (showAd) {
-            Spacer(Modifier.height(24.px()))
+            // Safety gap between the controls and the ad: never less than 16dp (prevents accidental clicks).
+            Spacer(Modifier.height(maxOf(16.dp, 24.px())))
             val shape = RoundedCornerShape(28.px())
             Box(
                 Modifier

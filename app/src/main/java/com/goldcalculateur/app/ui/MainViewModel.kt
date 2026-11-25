@@ -42,6 +42,7 @@ data class MainUiState(
 class MainViewModel(
     private val settings: SettingsRepository,
     private val db: AppDatabase,
+    private val quotaRules: com.goldcalculateur.app.core.CalculationQuota,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(MainUiState())
@@ -132,12 +133,21 @@ class MainViewModel(
         if (result.isSuccess) viewModelScope.launch { countAndRecord(s, result) }
     }
 
+    private fun signatureOf(s: MainUiState) = "${WorkStateCodec.encode(s.work)}#${s.scale.decimals}#${s.selectedCutIndex}"
+
+    /** True when pressing "Calculate" now would be a NEW calculation (identical re-presses are free). */
+    fun nextCalculationIsNew(): Boolean = signatureOf(_state.value) != lastCountedSignature
+
+    /** True when the user has typed something (used to avoid interrupting a calculation with an ad). */
+    fun hasInputs(): Boolean = _state.value.work.rows.any { it.weight.isNotBlank() || it.karat.isNotBlank() }
+
     private suspend fun countAndRecord(s: MainUiState, result: ResultUi) {
         // Re-pressing "Calculate" with identical inputs is not a new completed calculation.
-        val signature = "${WorkStateCodec.encode(s.work)}#${s.scale.decimals}#${s.selectedCutIndex}"
+        val signature = signatureOf(s)
         if (signature == lastCountedSignature) return
         lastCountedSignature = signature
         settings.recordCompletedCalculation(signature)
+        settings.consumeQuota(quotaRules, com.goldcalculateur.app.core.QuotaClock.today())
 
         val (weight, karat) = when (result) {
             is ResultUi.Added -> result.result.practicalWeight to result.result.practicalFinalKarat

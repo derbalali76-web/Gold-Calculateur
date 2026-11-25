@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.room.Room
 import com.goldcalculateur.app.ads.AdsManager
 import com.goldcalculateur.app.billing.BillingManager
+import com.goldcalculateur.app.core.CalculationQuota
 import com.goldcalculateur.app.data.AppDatabase
 import com.goldcalculateur.app.data.SettingsRepository
 import kotlinx.coroutines.CoroutineScope
@@ -17,6 +18,7 @@ class AppContainer(app: Application) {
 
     val settings = SettingsRepository(app)
     val database: AppDatabase = Room.databaseBuilder(app, AppDatabase::class.java, "gold_calculateur.db").build()
+    val quota = CalculationQuota(BuildConfig.FREE_CALCS_PER_DAY, BuildConfig.REWARD_CALCS_PER_AD)
     val ads = AdsManager(app, settings, scope)
     val billing = BillingManager(app, scope, settings)
 

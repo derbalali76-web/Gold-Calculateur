@@ -13,6 +13,8 @@ fun prop(name: String): String? =
 val testAppId = "ca-app-pub-3940256099942544~3347511713"
 val testBannerId = "ca-app-pub-3940256099942544/9214589741"
 val testInterstitialId = "ca-app-pub-3940256099942544/1033173712"
+val testRewardedId = "ca-app-pub-3940256099942544/5224354917"
+val testAppOpenId = "ca-app-pub-3940256099942544/9257395921"
 
 android {
     namespace = "com.goldcalculateur.app"
@@ -29,6 +31,9 @@ android {
         // ---- Ad / billing policy knobs (change here, the calculation engine is untouched) ----
         buildConfigField("int", "INTERSTITIAL_EVERY_N_CALCS", "3")
         buildConfigField("long", "INTERSTITIAL_COOLDOWN_SECONDS", "180L")
+        buildConfigField("int", "FREE_CALCS_PER_DAY", "3")
+        buildConfigField("int", "REWARD_CALCS_PER_AD", "3")
+        buildConfigField("long", "APP_OPEN_MIN_IDLE_MINUTES", "15L")
         buildConfigField("String", "REMOVE_ADS_PRODUCT_ID", "\"remove_ads_lifetime\"")
 
     }
@@ -52,6 +57,8 @@ android {
             manifestPlaceholders["admobAppId"] = testAppId
             buildConfigField("String", "ADMOB_BANNER_UNIT_ID", testBannerId.q())
             buildConfigField("String", "ADMOB_INTERSTITIAL_UNIT_ID", testInterstitialId.q())
+            buildConfigField("String", "ADMOB_REWARDED_UNIT_ID", testRewardedId.q())
+            buildConfigField("String", "ADMOB_APP_OPEN_UNIT_ID", testAppOpenId.q())
             buildConfigField("String", "PRIVACY_POLICY_URL", (prop("PRIVACY_POLICY_URL") ?: "").q())
             buildConfigField("String", "TERMS_URL", (prop("TERMS_URL") ?: "").q())
             buildConfigField("String", "CONTACT_EMAIL", (prop("CONTACT_EMAIL") ?: "").q())
@@ -64,6 +71,9 @@ android {
             manifestPlaceholders["admobAppId"] = prop("ADMOB_APP_ID") ?: ""
             buildConfigField("String", "ADMOB_BANNER_UNIT_ID", (prop("ADMOB_BANNER_UNIT_ID") ?: "").q())
             buildConfigField("String", "ADMOB_INTERSTITIAL_UNIT_ID", (prop("ADMOB_INTERSTITIAL_UNIT_ID") ?: "").q())
+            // Optional: when blank the rewarded/app-open features are simply off (the calculator never gates on them).
+            buildConfigField("String", "ADMOB_REWARDED_UNIT_ID", (prop("ADMOB_REWARDED_UNIT_ID") ?: "").q())
+            buildConfigField("String", "ADMOB_APP_OPEN_UNIT_ID", (prop("ADMOB_APP_OPEN_UNIT_ID") ?: "").q())
             buildConfigField("String", "PRIVACY_POLICY_URL", (prop("PRIVACY_POLICY_URL") ?: "").q())
             buildConfigField("String", "TERMS_URL", (prop("TERMS_URL") ?: "").q())
             buildConfigField("String", "CONTACT_EMAIL", (prop("CONTACT_EMAIL") ?: "").q())
@@ -99,10 +109,11 @@ val requiredForRelease = listOf(
 )
 val missingForRelease = requiredForRelease.filter { prop(it) == null }
 val recommendedForRelease = listOf("PRIVACY_POLICY_URL", "TERMS_URL", "CONTACT_EMAIL")
-val usesGoogleTestIds = listOf("ADMOB_APP_ID", "ADMOB_BANNER_UNIT_ID", "ADMOB_INTERSTITIAL_UNIT_ID")
+val adIdProps = listOf("ADMOB_APP_ID", "ADMOB_BANNER_UNIT_ID", "ADMOB_INTERSTITIAL_UNIT_ID", "ADMOB_REWARDED_UNIT_ID", "ADMOB_APP_OPEN_UNIT_ID")
+val usesGoogleTestIds = adIdProps
     .any { prop(it)?.contains("3940256099942544") == true }
 // Release ids must also look like real AdMob ids (publisher "ca-app-pub-<16 digits>").
-val malformedAdIds = listOf("ADMOB_APP_ID", "ADMOB_BANNER_UNIT_ID", "ADMOB_INTERSTITIAL_UNIT_ID")
+val malformedAdIds = adIdProps
     .filter { prop(it)?.matches(Regex("""ca-app-pub-\d{16}[~/]\d+""")) == false }
 
 val verifyReleaseConfig by tasks.registering {
