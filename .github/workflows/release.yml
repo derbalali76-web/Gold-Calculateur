@@ -7,9 +7,11 @@ name: Release - signed AAB + APK (manual)
 
 on:
   workflow_dispatch:
+  push:
+    paths: ['.release-trigger']   # committing this file starts a release build
 
 permissions:
-  contents: read
+  contents: write   # to publish the GitHub Release
 
 concurrency:
   group: release
@@ -76,3 +78,18 @@ jobs:
         with:
           name: gold-calculateur-release-apk
           path: app/build/outputs/apk/release/*.apk
+
+      - name: Publish GitHub Release (APK + AAB)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION_CODE: ${{ github.run_number }}
+        run: |
+          TAG="v1.0.${VERSION_CODE}"
+          APK=$(ls app/build/outputs/apk/release/*.apk | head -1)
+          AAB=$(ls app/build/outputs/bundle/release/*.aab | head -1)
+          cp "$APK" "Gold-Calculateur-$TAG.apk"
+          cp "$AAB" "Gold-Calculateur-$TAG.aab"
+          gh release create "$TAG" "Gold-Calculateur-$TAG.apk" "Gold-Calculateur-$TAG.aab" \
+            --repo "${{ github.repository }}" --target "${{ github.sha }}" \
+            --title "Gold Calculateur $TAG" \
+            --notes "Signed with the permanent key. Installs over the previous version. APK = direct install, AAB = Google Play."
