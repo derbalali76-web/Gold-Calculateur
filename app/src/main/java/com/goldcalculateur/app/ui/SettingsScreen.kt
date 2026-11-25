@@ -109,12 +109,6 @@ fun SettingsScreen(
                 Choice("theme_light", stringResource(R.string.theme_light), theme == ThemeMode.LIGHT) { actions.onTheme(ThemeMode.LIGHT) }
                 Choice("theme_system", stringResource(R.string.theme_system), theme == ThemeMode.SYSTEM) { actions.onTheme(ThemeMode.SYSTEM) }
             }
-            // ---- scale precision
-            Section(stringResource(R.string.scale_precision)) {
-                Choice("scale_2", stringResource(R.string.scale_2), scale == ScalePrecision.G_0_01) { actions.onScale(ScalePrecision.G_0_01) }
-                Choice("scale_3", stringResource(R.string.scale_3), scale == ScalePrecision.G_0_001) { actions.onScale(ScalePrecision.G_0_001) }
-                Choice("scale_4", stringResource(R.string.scale_4), scale == ScalePrecision.G_0_0001) { actions.onScale(ScalePrecision.G_0_0001) }
-            }
             // ---- remove ads
             Section(stringResource(R.string.remove_ads_title)) {
                 Text(stringResource(R.string.remove_ads_desc), color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 15.sp)

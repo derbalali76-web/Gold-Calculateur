@@ -147,12 +147,12 @@ fun MainScreen(
                         IngotsCard(state.work.rows, state.errorRow, actions)
                         GoldButton(
                             onClick = actions.onAddRow,
-                            modifier = Modifier.align(Alignment.CenterHorizontally).width(427.px()).height(67.px()).testTag("add_row"),
+                            modifier = Modifier.align(Alignment.CenterHorizontally).width(560.px()).height(88.px()).testTag("add_row"),
                             shape = RoundedCornerShape(20.px()),
                         ) {
                             Icon(Icons.Filled.Add, contentDescription = null, tint = Look.OnGold, modifier = Modifier.size(44.px()))
                             Spacer(Modifier.width(10.px()))
-                            Text(stringResource(R.string.add_ingot_row), color = Look.OnGold, fontSize = 32.spx(), fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.add_ingot_row), color = Look.OnGold, fontSize = 42.spx(), fontWeight = FontWeight.Bold)
                         }
                         SummaryRow(state, nf)
                         TargetCard(state.work.target, actions.onTargetChange)
@@ -198,28 +198,28 @@ fun MainScreen(
 private fun Header() {
     // Artwork stays at the same physical sides in every language, like the mockup.
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-        Box(Modifier.fillMaxWidth().height(135.px())) {
+        Box(Modifier.fillMaxWidth().height(125.px())) {
             Image(
                 painterResource(R.drawable.art_hdr_bars), contentDescription = null,
-                modifier = Modifier.align(Alignment.TopStart).padding(start = 25.px()).size(width = 185.px(), height = 130.px()),
+                modifier = Modifier.align(Alignment.TopStart).padding(start = 25.px()).size(width = 150.px(), height = 105.px()),
             )
             Column(Modifier.align(Alignment.TopCenter), horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     stringResource(R.string.app_name),
                     style = TextStyle(
-                        brush = Look.GoldTextGradient, fontSize = 62.spx(), fontWeight = FontWeight.ExtraBold,
+                        brush = Look.GoldTextGradient, fontSize = 66.spx(), fontWeight = FontWeight.ExtraBold,
                         fontFamily = FontFamily.SansSerif, fontStyle = FontStyle.Italic,
                     ),
                     maxLines = 1,
                 )
                 Text(
                     stringResource(R.string.tagline),
-                    color = Look.Cream, fontSize = 38.spx(), maxLines = 1,
+                    color = Look.Cream, fontSize = 40.spx(), maxLines = 1,
                 )
             }
             Image(
                 painterResource(R.drawable.art_hdr_scales), contentDescription = null,
-                modifier = Modifier.align(Alignment.TopEnd).padding(end = 32.px()).size(width = 152.px(), height = 130.px()),
+                modifier = Modifier.align(Alignment.TopEnd).padding(end = 32.px()).size(width = 125.px(), height = 105.px()),
             )
         }
     }
@@ -237,7 +237,7 @@ private fun IngotsCard(rows: List<IngotRow>, errorRow: Int?, actions: MainAction
             .background(Look.TableCell)
             .border(1.px(), Look.GridLine, shape),
     ) {
-        Row(Modifier.fillMaxWidth().height(55.px()).background(Look.TableHeader)) {
+        Row(Modifier.fillMaxWidth().height(92.px()).background(Look.TableHeader)) {
             HeaderCell(stringResource(R.string.col_ingot), Modifier.weight(129f))
             VerticalDivider(color = Look.GridLine)
             HeaderCell(stringResource(R.string.col_weight), Modifier.weight(365f))
@@ -260,7 +260,7 @@ private fun HeaderCell(text: String, modifier: Modifier) {
     Box(modifier.fillMaxHeight(), contentAlignment = Alignment.Center) {
         Text(
             text,
-            color = MaterialTheme.extra.goldText, fontSize = 28.spx(), fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.extra.goldText, fontSize = 32.spx(), fontWeight = FontWeight.SemiBold,
             textAlign = TextAlign.Center, maxLines = 1, overflow = TextOverflow.Ellipsis,
         )
     }
@@ -269,13 +269,13 @@ private fun HeaderCell(text: String, modifier: Modifier) {
 @Composable
 private fun IngotRowView(number: Int, row: IngotRow, isError: Boolean, actions: MainActions) {
     Row(
-        modifier = Modifier.fillMaxWidth().height(55.px()),
+        modifier = Modifier.fillMaxWidth().height(92.px()),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(Modifier.weight(129f).fillMaxHeight(), contentAlignment = Alignment.Center) {
             Text(
                 number.toString(),
-                color = MaterialTheme.colorScheme.onSurface, fontSize = 32.spx(),
+                color = MaterialTheme.colorScheme.onSurface, fontSize = 44.spx(),
                 textAlign = TextAlign.Center,
             )
         }
@@ -283,14 +283,14 @@ private fun IngotRowView(number: Int, row: IngotRow, isError: Boolean, actions: 
         CompactField(
             value = row.weight, onValueChange = { actions.onWeightChange(row.id, it) },
             placeholder = stringResource(R.string.hint_weight), isError = isError, plain = true,
-            height = 55.px(), fontSize = 32.spx(),
+            height = 92.px(), fontSize = 46.spx(),
             modifier = Modifier.weight(365f).testTag("weight_$number"),
         )
         VerticalDivider(color = Look.GridLine)
         CompactField(
             value = row.karat, onValueChange = { actions.onKaratChange(row.id, it) },
             placeholder = stringResource(R.string.hint_karat), isError = isError, plain = true,
-            height = 55.px(), fontSize = 32.spx(),
+            height = 92.px(), fontSize = 46.spx(),
             modifier = Modifier.weight(324f).testTag("karat_$number"),
         )
         VerticalDivider(color = Look.GridLine)
@@ -302,7 +302,7 @@ private fun IngotRowView(number: Int, row: IngotRow, isError: Boolean, actions: 
                 Icons.Filled.Delete,
                 contentDescription = stringResource(R.string.cd_delete_ingot, number),
                 tint = MaterialTheme.colorScheme.error,
-                modifier = Modifier.size(42.px()),
+                modifier = Modifier.size(54.px()),
             )
         }
     }
@@ -317,14 +317,14 @@ private fun SummaryRow(state: MainUiState, nf: NumberFormatter) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(17.px())) {
         SummaryCard(
             label = stringResource(R.string.summary_total_weight),
-            value = summary?.let { "${nf.trimmed(it.totalWeight, 4)} $g" } ?: "—",
+            value = summary?.let { "${nf.trimmed(it.totalWeight, 2)} $g" } ?: "—",
             art = R.drawable.art_sum_scales,
             modifier = Modifier.weight(470f).testTag("summary_total"),
         )
         SummaryCard(
             label = stringResource(R.string.summary_average_karat),
             // Weighted average, shown as a bare number (no "/1000").
-            value = summary?.let { nf.trimmed(it.averageKarat, 3) } ?: "—",
+            value = summary?.let { nf.trimmed(it.averageKarat, 2) } ?: "—",
             art = R.drawable.art_sum_bars,
             modifier = Modifier.weight(468f).testTag("summary_average"),
         )
@@ -336,7 +336,7 @@ private fun SummaryCard(label: String, value: String, art: Int, modifier: Modifi
     val shape = RoundedCornerShape(28.px())
     Row(
         modifier
-            .height(114.px())
+            .height(150.px())
             .clip(shape)
             .background(if (MaterialTheme.extra.isDark) Look.CardGradientDark else Brush.verticalGradient(listOf(MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surface)))
             .border(2.px(), Look.GoldBorder, shape)
@@ -344,13 +344,13 @@ private fun SummaryCard(label: String, value: String, art: Int, modifier: Modifi
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(Modifier.weight(1f)) {
-            Text(label, color = Look.Cream, fontSize = 27.spx(), maxLines = 1)
+            Text(label, color = Look.Cream, fontSize = 32.spx(), maxLines = 1)
             Text(
-                value, color = MaterialTheme.extra.goldText, fontSize = 44.spx(), fontWeight = FontWeight.Bold,
+                value, color = MaterialTheme.extra.goldText, fontSize = 56.spx(), fontWeight = FontWeight.Bold,
                 maxLines = 1, overflow = TextOverflow.Ellipsis,
             )
         }
-        Image(painterResource(art), contentDescription = null, modifier = Modifier.size(width = 105.px(), height = 90.px()))
+        Image(painterResource(art), contentDescription = null, modifier = Modifier.size(width = 90.px(), height = 78.px()))
     }
 }
 
@@ -360,27 +360,27 @@ private fun TargetCard(target: String, onChange: (String) -> Unit) {
     Row(
         Modifier
             .fillMaxWidth()
-            .height(89.px())
+            .height(124.px())
             .clip(shape)
             .background(Brush.verticalGradient(listOf(Color(0xFF00192A), Color(0xFF022037))))
             .border(1.px(), Look.GridLine, shape)
             .padding(horizontal = 18.px()),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Image(painterResource(R.drawable.art_ic_target), contentDescription = null, modifier = Modifier.size(52.px()))
-        Spacer(Modifier.width(14.px()))
+        Image(painterResource(R.drawable.art_ic_target), contentDescription = null, modifier = Modifier.size(56.px()))
+        Spacer(Modifier.width(12.px()))
         Text(
             stringResource(R.string.target_karat),
-            color = Look.Cream, fontSize = 34.spx(), fontWeight = FontWeight.Bold, maxLines = 1,
+            color = Look.Cream, fontSize = 38.spx(), fontWeight = FontWeight.Bold, maxLines = 1,
         )
         Spacer(Modifier.width(24.px()))
         CompactField(
             value = target, onValueChange = onChange, placeholder = "748",
-            imeAction = ImeAction.Done, height = 65.px(), fontSize = 40.spx(), radius = 14.px(),
+            imeAction = ImeAction.Done, height = 92.px(), fontSize = 54.spx(), radius = 16.px(),
             modifier = Modifier.weight(1f).testTag("target"),
         )
         Spacer(Modifier.width(14.px()))
-        KaratStepper(target, onChange, base = 750, modifier = Modifier.size(width = 52.px(), height = 56.px()))
+        KaratStepper(target, onChange, base = 750, modifier = Modifier.size(width = 80.px(), height = 92.px()))
     }
 }
 
@@ -404,21 +404,22 @@ private fun ModeSwitch(mode: CalcMode, onChange: (CalcMode) -> Unit) {
 private fun ModeButton(text: String, art: Int, selected: Boolean, onClick: () -> Unit, modifier: Modifier) {
     GoldButton(
         onClick = onClick, selected = selected, shape = RoundedCornerShape(20.px()),
-        modifier = modifier.height(78.px()).semantics { this.selected = selected },
+        modifier = modifier.height(104.px()).semantics { this.selected = selected },
     ) {
-        Image(painterResource(art), contentDescription = null, modifier = Modifier.size(width = 80.px(), height = 62.px()))
+        Image(painterResource(art), contentDescription = null, modifier = Modifier.size(width = 76.px(), height = 62.px()))
         Spacer(Modifier.width(10.px()))
         Text(
             text,
             color = if (selected) Look.OnGold else Look.Cream,
-            fontSize = 32.spx(), fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis,
+            fontSize = 38.spx(), fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis,
         )
     }
 }
 
-private val QuickKarats = listOf("800", "850", "875", "900", "950", "1000")
+/** (label shown, thousandths value) */
+private val QuickKarats = listOf("18K" to "750", "21K" to "875", "22K" to "917", "24K" to "1000")
 
-/** Shown only for the "add ingot" method. Changing it refreshes the same screen and result in place. */
+/** Shown only for the "add ingot" method: the karat to add, typed or picked from the chips. */
 @Composable
 private fun AddedKaratCard(addedKarat: String, onChange: (String) -> Unit) {
     val current: BigDecimal? = InputParser.parse(addedKarat)
@@ -429,26 +430,27 @@ private fun AddedKaratCard(addedKarat: String, onChange: (String) -> Unit) {
             .clip(shape)
             .background(Brush.verticalGradient(listOf(Color(0xFF00172A), Color(0xFF041F35))))
             .border(1.px(), Look.GridLine, shape)
-            .padding(horizontal = 30.px(), vertical = 8.px()),
+            .padding(horizontal = 26.px(), vertical = 14.px()),
+        verticalArrangement = Arrangement.spacedBy(12.px()),
     ) {
         Text(
             stringResource(R.string.added_karat), color = MaterialTheme.extra.goldText,
-            fontSize = 28.spx(), fontWeight = FontWeight.Bold,
+            fontSize = 38.spx(), fontWeight = FontWeight.Bold,
         )
-        Spacer(Modifier.height(6.px()))
-        Row(horizontalArrangement = Arrangement.spacedBy(10.px()), verticalAlignment = Alignment.CenterVertically) {
+        Row(horizontalArrangement = Arrangement.spacedBy(14.px()), verticalAlignment = Alignment.CenterVertically) {
             CompactField(
                 value = addedKarat, onValueChange = onChange, placeholder = "1000",
-                imeAction = ImeAction.Done, height = 52.px(), fontSize = 32.spx(), radius = 12.px(),
-                modifier = Modifier.width(200.px()).testTag("added_karat"),
+                imeAction = ImeAction.Done, height = 92.px(), fontSize = 54.spx(), radius = 16.px(),
+                modifier = Modifier.weight(1f).testTag("added_karat"),
             )
-            KaratStepper(addedKarat, onChange, base = 1000, modifier = Modifier.size(width = 42.px(), height = 52.px()))
-            QuickKarats.forEach { preset ->
-                val selected = current != null && current.compareTo(BigDecimal(preset)) == 0
-                QuickChip(preset, selected, { onChange(preset) }, Modifier.weight(1f).testTag("chip_$preset"))
+            KaratStepper(addedKarat, onChange, base = 1000, modifier = Modifier.size(width = 80.px(), height = 92.px()))
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(12.px())) {
+            QuickKarats.forEach { (label, value) ->
+                val selected = current != null && current.compareTo(BigDecimal(value)) == 0
+                QuickChip(label, selected, { onChange(value) }, Modifier.weight(1f).testTag("chip_$value"))
             }
         }
-        Spacer(Modifier.height(6.px()))
     }
 }
 
@@ -457,7 +459,7 @@ private fun QuickChip(text: String, selected: Boolean, onClick: () -> Unit, modi
     val shape = RoundedCornerShape(12.px())
     Box(
         modifier = modifier
-            .height(48.px())
+            .height(84.px())
             .clip(shape)
             .background(if (selected) Look.GoldGradient else Brush.verticalGradient(listOf(Color(0xFF012139), Color(0xFF011D35))))
             .border(1.px(), if (selected) Color(0xFFFFE680) else Look.FieldBorder, shape)
@@ -467,7 +469,7 @@ private fun QuickChip(text: String, selected: Boolean, onClick: () -> Unit, modi
     ) {
         Text(
             text, color = if (selected) Look.OnGold else Look.Cream,
-            fontSize = 28.spx(), fontWeight = FontWeight.SemiBold, maxLines = 1,
+            fontSize = 40.spx(), fontWeight = FontWeight.Bold, maxLines = 1,
         )
     }
 }
@@ -505,10 +507,10 @@ private fun BottomBar(
                 )
                 GoldButton(
                     onClick = onCalculate,
-                    modifier = Modifier.weight(441f).height(103.px()).testTag("calculate"),
+                    modifier = Modifier.weight(441f).height(120.px()).testTag("calculate"),
                     shape = RoundedCornerShape(28.px()),
                 ) {
-                    Text(stringResource(R.string.calculate), color = Look.OnGold, fontSize = 50.spx(), fontWeight = FontWeight.ExtraBold)
+                    Text(stringResource(R.string.calculate), color = Look.OnGold, fontSize = 58.spx(), fontWeight = FontWeight.ExtraBold)
                     Spacer(Modifier.width(18.px()))
                     Icon(Icons.Filled.Calculate, contentDescription = null, tint = Look.OnGold, modifier = Modifier.size(64.px()))
                 }
@@ -536,14 +538,14 @@ private fun BarButton(art: Int, label: String, onClick: () -> Unit, modifier: Mo
     val shape = RoundedCornerShape(28.px())
     Column(
         modifier
-            .height(103.px())
+            .height(120.px())
             .clip(shape)
             .background(Brush.verticalGradient(listOf(Color(0xFF001A30), Color(0xFF00101D))))
             .border(2.px(), Look.GoldBorder, shape)
             .clickable(role = Role.Button, onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center,
     ) {
-        Image(painterResource(art), contentDescription = null, modifier = Modifier.size(54.px()))
-        Text(label, color = Look.Cream, fontSize = 26.spx(), maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Image(painterResource(art), contentDescription = null, modifier = Modifier.size(58.px()))
+        Text(label, color = Look.Cream, fontSize = 30.spx(), maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }

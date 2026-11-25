@@ -63,7 +63,6 @@ import com.goldcalculateur.engine.AddResult
 import com.goldcalculateur.engine.CalcError
 import com.goldcalculateur.engine.CutPlan
 import com.goldcalculateur.engine.CutStatus
-import com.goldcalculateur.engine.ScalePrecision
 import java.math.BigDecimal
 
 /**
@@ -99,38 +98,36 @@ fun ResultCard(state: MainUiState, nf: NumberFormatter, actions: MainActions, mo
 
         when (result) {
             is ResultUi.Failure -> MessageBox(errorMessage(result.error), isError = true, tag = "result_error")
-            is ResultUi.Added -> AddedBody(result.result, state.scale, nf)
-            is ResultUi.Cut -> CutBody(result, state.scale, nf, actions)
+            is ResultUi.Added -> AddedBody(result.result, nf)
+            is ResultUi.Cut -> CutBody(result, nf, actions)
         }
     }
 }
 
 // ------------------------------------------------------------------------------ add ingot
 
+private const val DEC = 2
+
 @Composable
-private fun AddedBody(r: AddResult, scale: ScalePrecision, nf: NumberFormatter) {
+private fun AddedBody(r: AddResult, nf: NumberFormatter) {
     val g = stringResource(R.string.unit_g)
-    val d = scale.decimals
-    ResultTable {
-        ResultRow(stringResource(R.string.r_added_karat), nf.trimmed(r.addedKarat, 3))
-        ResultRow(
-            stringResource(R.string.r_add_weight), "${nf.fixed(r.practicalWeight, d)} $g",
-            big = true, tag = "add_weight",
-        )
-        ResultRow(stringResource(R.string.r_final_weight), "${nf.fixed(r.practicalFinalWeight, d)} $g")
-        FinalKaratRow(nf.fixed(r.practicalFinalKarat, 3), r.isDeviationNoticeable)
-    }
+    BigGreenResult(
+        label = stringResource(R.string.r_add_weight),
+        value = "${nf.fixed(r.practicalWeight, DEC)} $g",
+        tag = "add_weight",
+    )
     if (r.isDeviationNoticeable) {
-        MessageBox(stringResource(R.string.warn_deviation, nf.fixed(r.deviation.abs(), 3)), isError = false, tag = "deviation_warning")
+        MessageBox(stringResource(R.string.warn_deviation, nf.fixed(r.deviation.abs(), DEC)), isError = false, tag = "deviation_warning")
     }
     Details(
+        finalKarat = nf.fixed(r.practicalFinalKarat, DEC), deviationNoticeable = r.isDeviationNoticeable,
         rows = listOf(
-            stringResource(R.string.d_theoretical_weight) to "${nf.trimmed(r.theoreticalWeight, 10)} $g",
-            stringResource(R.string.d_practical_weight) to "${nf.fixed(r.practicalWeight, d)} $g",
-            stringResource(R.string.d_scale_precision) to scaleLabel(scale),
-            stringResource(R.string.d_actual_karat) to nf.fixed(r.practicalFinalKarat, 6),
+            stringResource(R.string.r_added_karat) to nf.trimmed(r.addedKarat, DEC),
+            stringResource(R.string.r_add_weight) to "${nf.fixed(r.practicalWeight, DEC)} $g",
+            stringResource(R.string.r_final_weight) to "${nf.fixed(r.practicalFinalWeight, DEC)} $g",
+            stringResource(R.string.d_theoretical_weight) to "${nf.fixed(r.theoreticalWeight, DEC)} $g",
             stringResource(R.string.d_deviation) to signed(r.deviation, nf),
-            stringResource(R.string.d_group_gold) to "${nf.trimmed(r.summary.pureGold, 6)} $g",
+            stringResource(R.string.d_group_gold) to "${nf.fixed(r.summary.pureGold, DEC)} $g",
         ),
     )
     Note(stringResource(R.string.note_add))
@@ -139,68 +136,62 @@ private fun AddedBody(r: AddResult, scale: ScalePrecision, nf: NumberFormatter) 
 // ------------------------------------------------------------------------------ cut & refine
 
 @Composable
-private fun CutBody(res: ResultUi.Cut, scale: ScalePrecision, nf: NumberFormatter, actions: MainActions) {
+private fun CutBody(res: ResultUi.Cut, nf: NumberFormatter, actions: MainActions) {
     val a = res.analysis
     val g = stringResource(R.string.unit_g)
-    val d = scale.decimals
     var menuOpen by remember { mutableStateOf(false) }
-
     val plan: CutPlan? = a.plan
-    ResultTable {
-        // Selected ingot: a dropdown inside the table (no extra screen, no long list of alternatives).
-        Row(Modifier.fillMaxWidth().height(45.px()), verticalAlignment = Alignment.CenterVertically) {
-            Box(Modifier.weight(1f).fillMaxHeight().padding(horizontal = 18.px()), contentAlignment = Alignment.CenterStart) {
-                Text(stringResource(R.string.r_selected_ingot), color = Look.Cream, fontSize = 27.spx(), maxLines = 1)
+
+    // Ingot picker ABOVE the result: a window to change which ingot is cut.
+    val pickerShape = RoundedCornerShape(18.px())
+    Box(Modifier.fillMaxWidth()) {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .clip(pickerShape)
+                .background(Look.FieldBg)
+                .border(1.5.px(), Look.FieldBorder, pickerShape)
+                .clickable { menuOpen = true }
+                .padding(horizontal = 22.px(), vertical = 14.px())
+                .testTag("cut_ingot_dropdown"),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(Modifier.weight(1f)) {
+                Text(stringResource(R.string.r_selected_ingot), color = Look.Cream, fontSize = 28.spx())
+                Text(
+                    ingotOption(res, a.selectedIndex, nf),
+                    color = MaterialTheme.colorScheme.onSurface, fontSize = 42.spx(), fontWeight = FontWeight.Bold,
+                )
             }
-            VerticalDivider(color = Look.GridLine)
-            Box(Modifier.weight(1f).fillMaxHeight().padding(3.px()), contentAlignment = Alignment.Center) {
-                Row(
-                    Modifier
-                        .clip(RoundedCornerShape(10.dp))
-                        .border(1.dp, Look.GridLine, RoundedCornerShape(10.dp))
-                        .clickable { menuOpen = true }
-                        .padding(horizontal = 14.px(), vertical = 4.px())
-                        .testTag("cut_ingot_dropdown"),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(ingotOption(res, a.selectedIndex, nf), fontWeight = FontWeight.Medium, fontSize = 28.spx(), color = MaterialTheme.colorScheme.onSurface)
-                    Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null, tint = MaterialTheme.extra.goldText, modifier = Modifier.size(34.px()))
-                }
-                DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                    a.candidates.forEach { c ->
-                        DropdownMenuItem(
-                            text = {
-                                val usable = c.status == CutStatus.OK
-                                Text(
-                                    ingotOption(res, c.index, nf) + if (usable) "" else "  ✕",
-                                    color = if (usable) MaterialTheme.colorScheme.onSurface
-                                    else MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            },
-                            onClick = { menuOpen = false; actions.onSelectCutIngot(c.index) },
-                            modifier = Modifier.testTag("cut_option_${c.index}"),
-                        )
-                    }
-                }
-            }
+            Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null, tint = MaterialTheme.extra.goldText, modifier = Modifier.size(56.px()))
         }
-        if (plan != null) {
-            HorizontalDivider(color = Look.GridLine)
-            ResultRow(stringResource(R.string.r_cut_weight), "${nf.fixed(plan.practicalCut, d)} $g", big = true, tag = "cut_weight")
-            ResultRow(stringResource(R.string.r_recovered_gold), "${nf.fixed(plan.practicalRecoveredGold, d)} $g")
-            ResultRow(stringResource(R.string.r_remaining_weight), "${nf.fixed(plan.practicalRemainingWeight, d)} $g")
-            ResultRow(stringResource(R.string.r_final_weight), "${nf.fixed(plan.practicalFinalWeight, d)} $g")
-            FinalKaratRow(nf.fixed(plan.practicalFinalKarat, 3), plan.isDeviationNoticeable)
+        DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+            a.candidates.forEach { c ->
+                DropdownMenuItem(
+                    text = {
+                        val usable = c.status == CutStatus.OK
+                        Text(
+                            ingotOption(res, c.index, nf) + if (usable) "" else "  ✕",
+                            fontSize = 20.sp,
+                            color = if (usable) MaterialTheme.colorScheme.onSurface
+                            else MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    },
+                    onClick = { menuOpen = false; actions.onSelectCutIngot(c.index) },
+                    modifier = Modifier.testTag("cut_option_${c.index}"),
+                )
+            }
         }
     }
+    Spacer(Modifier.height(14.px()))
 
     if (plan == null) {
         val candidate = a.candidates[a.selectedIndex]
         val message = when (a.selectedStatus) {
             CutStatus.INSUFFICIENT_WEIGHT -> stringResource(
                 R.string.cut_insufficient,
-                nf.trimmed(candidate.requiredCut ?: BigDecimal.ZERO, 4),
-                nf.trimmed(candidate.ingot.weight, 4),
+                nf.fixed(candidate.requiredCut ?: BigDecimal.ZERO, DEC),
+                nf.fixed(candidate.ingot.weight, DEC),
             )
             else -> stringResource(R.string.cut_pure)
         }
@@ -208,17 +199,25 @@ private fun CutBody(res: ResultUi.Cut, scale: ScalePrecision, nf: NumberFormatte
         return
     }
 
+    BigGreenResult(
+        label = stringResource(R.string.r_cut_weight),
+        value = "${nf.fixed(plan.practicalCut, DEC)} $g",
+        tag = "cut_weight",
+    )
     if (plan.isDeviationNoticeable) {
-        MessageBox(stringResource(R.string.warn_deviation, nf.fixed(plan.deviation.abs(), 3)), isError = false, tag = "deviation_warning")
+        MessageBox(stringResource(R.string.warn_deviation, nf.fixed(plan.deviation.abs(), DEC)), isError = false, tag = "deviation_warning")
     }
     Details(
+        finalKarat = nf.fixed(plan.practicalFinalKarat, DEC), deviationNoticeable = plan.isDeviationNoticeable,
         rows = listOf(
-            stringResource(R.string.d_theoretical_weight) to "${nf.trimmed(plan.theoreticalCut, 10)} $g",
-            stringResource(R.string.d_practical_weight) to "${nf.fixed(plan.practicalCut, d)} $g",
-            stringResource(R.string.d_scale_precision) to scaleLabel(scale),
-            stringResource(R.string.d_actual_karat) to nf.fixed(plan.practicalFinalKarat, 6),
+            stringResource(R.string.r_selected_ingot) to ingotOption(res, a.selectedIndex, nf),
+            stringResource(R.string.r_cut_weight) to "${nf.fixed(plan.practicalCut, DEC)} $g",
+            stringResource(R.string.r_recovered_gold) to "${nf.fixed(plan.practicalRecoveredGold, DEC)} $g",
+            stringResource(R.string.r_remaining_weight) to "${nf.fixed(plan.practicalRemainingWeight, DEC)} $g",
+            stringResource(R.string.r_final_weight) to "${nf.fixed(plan.practicalFinalWeight, DEC)} $g",
+            stringResource(R.string.d_theoretical_weight) to "${nf.fixed(plan.theoreticalCut, DEC)} $g",
             stringResource(R.string.d_deviation) to signed(plan.practicalFinalKarat.subtract(plan.target), nf),
-            stringResource(R.string.d_group_gold) to "${nf.trimmed(a.summary.pureGold, 6)} $g",
+            stringResource(R.string.d_group_gold) to "${nf.fixed(a.summary.pureGold, DEC)} $g",
         ),
     )
     Note(stringResource(R.string.note_cut))
@@ -227,44 +226,51 @@ private fun CutBody(res: ResultUi.Cut, scale: ScalePrecision, nf: NumberFormatte
 @Composable
 private fun ingotOption(res: ResultUi.Cut, engineIndex: Int, nf: NumberFormatter): String {
     val c = res.analysis.candidates[engineIndex]
-    return stringResource(R.string.ingot_option, res.rowNumbers[engineIndex], nf.trimmed(c.ingot.karat, 3))
+    return stringResource(R.string.ingot_option, res.rowNumbers[engineIndex], nf.trimmed(c.ingot.karat, DEC))
 }
 
 // ------------------------------------------------------------------------------ pieces
 
-/** Table + the gold nugget artwork beside it (like the mockup). */
+/** The one number the jeweller acts on: big, bold, green. */
 @Composable
-private fun ResultTable(content: @Composable ColumnScope.() -> Unit) {
-    val shape = RoundedCornerShape(12.px())
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Column(
-            Modifier
-                .weight(742f)
-                .clip(shape)
-                .background(Look.ResultCell)
-                .border(1.px(), Look.GridLine, shape),
-            content = content,
-        )
-        Box(Modifier.weight(180f), contentAlignment = Alignment.Center) {
-            Image(painterResource(R.drawable.art_nugget), contentDescription = null, modifier = Modifier.size(width = 150.px(), height = 140.px()))
+private fun BigGreenResult(label: String, value: String, tag: String) {
+    val shape = RoundedCornerShape(20.px())
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(Look.GreenRowBg)
+            .border(2.px(), Look.GreenRowBorder, shape)
+            .padding(horizontal = 22.px(), vertical = 16.px()),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(label, color = Look.Cream, fontSize = 32.spx(), fontWeight = FontWeight.SemiBold, textAlign = TextAlign.Center)
+            Text(
+                value,
+                modifier = Modifier.testTag(tag),
+                color = MaterialTheme.extra.success, fontSize = 84.spx(), fontWeight = FontWeight.ExtraBold,
+                textAlign = TextAlign.Center, maxLines = 1,
+                style = androidx.compose.ui.text.TextStyle(textDirection = TextDirection.Ltr),
+            )
         }
+        Image(painterResource(R.drawable.art_nugget), contentDescription = null, modifier = Modifier.size(width = 130.px(), height = 100.px()))
     }
 }
 
 @Composable
-private fun ResultRow(label: String, value: String, big: Boolean = false, tag: String? = null) {
+private fun ResultRow(label: String, value: String) {
     Column {
-        Row(Modifier.fillMaxWidth().height(43.px()), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.fillMaxWidth().height(72.px()), verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.weight(1f).fillMaxHeight().padding(horizontal = 18.px()), contentAlignment = Alignment.CenterStart) {
-                Text(label, color = Look.Cream, fontSize = 27.spx(), maxLines = 1)
+                Text(label, color = Look.Cream, fontSize = 30.spx(), maxLines = 2)
             }
             VerticalDivider(color = Look.GridLine)
             Box(Modifier.weight(1f).fillMaxHeight(), contentAlignment = Alignment.Center) {
                 Text(
                     value,
-                    modifier = if (tag != null) Modifier.testTag(tag) else Modifier,
                     color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = 30.spx(), fontWeight = FontWeight.Medium,
+                    fontSize = 36.spx(), fontWeight = FontWeight.Medium,
                     textAlign = TextAlign.Center, maxLines = 1,
                     style = androidx.compose.ui.text.TextStyle(textDirection = TextDirection.Ltr),
                 )
@@ -282,7 +288,7 @@ private fun FinalKaratRow(value: String, deviationNoticeable: Boolean) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(54.px())
+            .height(84.px())
             .clip(shape)
             .background(if (deviationNoticeable) color.copy(alpha = 0.16f) else Look.GreenRowBg)
             .border(1.px(), if (deviationNoticeable) color else Look.GreenRowBorder, shape)
@@ -292,7 +298,7 @@ private fun FinalKaratRow(value: String, deviationNoticeable: Boolean) {
         Box(Modifier.weight(1f).fillMaxHeight().padding(horizontal = 18.px()), contentAlignment = Alignment.CenterStart) {
             Text(
                 stringResource(R.string.r_final_karat),
-                color = Look.Cream, fontSize = 30.spx(), fontWeight = FontWeight.Bold, maxLines = 1,
+                color = Look.Cream, fontSize = 34.spx(), fontWeight = FontWeight.Bold, maxLines = 1,
             )
         }
         Row(
@@ -300,14 +306,14 @@ private fun FinalKaratRow(value: String, deviationNoticeable: Boolean) {
             horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                value, color = color, fontSize = 40.spx(), fontWeight = FontWeight.Bold,
+                value, color = color, fontSize = 46.spx(), fontWeight = FontWeight.Bold,
                 modifier = Modifier.testTag("final_karat"),
                 style = androidx.compose.ui.text.TextStyle(textDirection = TextDirection.Ltr),
             )
             Spacer(Modifier.width(14.px()))
             Icon(
                 if (deviationNoticeable) Icons.Filled.Warning else Icons.Filled.Check,
-                contentDescription = null, tint = color, modifier = Modifier.size(34.px()),
+                contentDescription = null, tint = color, modifier = Modifier.size(40.px()),
             )
         }
     }
@@ -334,30 +340,43 @@ private fun MessageBox(text: String, isError: Boolean, tag: String) {
 }
 
 @Composable
-private fun Details(rows: List<Pair<String, String>>) {
+private fun Details(rows: List<Pair<String, String>>, finalKarat: String, deviationNoticeable: Boolean) {
     var expanded by rememberSaveable { mutableStateOf(false) }
+    val shape = RoundedCornerShape(16.px())
     Row(
-        Modifier.clip(RoundedCornerShape(8.dp)).clickable { expanded = !expanded }.padding(vertical = 6.dp, horizontal = 4.dp).testTag("toggle_details"),
+        Modifier
+            .fillMaxWidth()
+            .padding(top = 8.px())
+            .clip(shape)
+            .border(1.px(), Look.GridLine, shape)
+            .clickable { expanded = !expanded }
+            .padding(vertical = 14.px(), horizontal = 18.px())
+            .testTag("toggle_details"),
         verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
     ) {
-        Text(stringResource(if (expanded) R.string.details_hide else R.string.details_show), color = MaterialTheme.extra.goldText, fontSize = 24.spx())
+        Text(
+            stringResource(if (expanded) R.string.details_hide else R.string.details_show),
+            color = MaterialTheme.extra.goldText, fontSize = 34.spx(), fontWeight = FontWeight.SemiBold,
+        )
         Icon(
             if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
-            contentDescription = null, tint = MaterialTheme.extra.goldText,
+            contentDescription = null, tint = MaterialTheme.extra.goldText, modifier = Modifier.size(46.px()),
         )
     }
     if (expanded) {
-        Column(Modifier.testTag("details")) {
-            rows.forEach { (label, value) ->
-                Row(Modifier.fillMaxWidth().padding(vertical = 3.dp)) {
-                    Text(label, modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        value, color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp, fontWeight = FontWeight.SemiBold,
-                        style = androidx.compose.ui.text.TextStyle(textDirection = TextDirection.Ltr),
-                    )
-                }
-            }
+        val tableShape = RoundedCornerShape(12.px())
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .padding(top = 10.px())
+                .clip(tableShape)
+                .background(Look.ResultCell)
+                .border(1.px(), Look.GridLine, tableShape)
+                .testTag("details"),
+        ) {
+            rows.forEach { (label, value) -> ResultRow(label, value) }
+            FinalKaratRow(finalKarat, deviationNoticeable)
         }
     }
 }
@@ -381,17 +400,9 @@ private fun IconTextButton(icon: androidx.compose.ui.graphics.vector.ImageVector
     }
 }
 
-@Composable
-private fun scaleLabel(scale: ScalePrecision): String = stringResource(
-    when (scale) {
-        ScalePrecision.G_0_01 -> R.string.scale_2
-        ScalePrecision.G_0_001 -> R.string.scale_3
-        ScalePrecision.G_0_0001 -> R.string.scale_4
-    }
-)
 
 private fun signed(v: BigDecimal, nf: NumberFormatter): String =
-    (if (v.signum() > 0) "+" else "") + nf.fixed(v, 4)
+    (if (v.signum() > 0) "+" else "") + nf.fixed(v, 2)
 
 @Composable
 fun errorMessage(e: UiError): String = when (e) {

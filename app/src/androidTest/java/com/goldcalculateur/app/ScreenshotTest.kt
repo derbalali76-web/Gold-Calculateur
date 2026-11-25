@@ -38,7 +38,7 @@ class ScreenshotTest {
         val cfg = Configuration(base.resources.configuration).apply { setLocale(Locale("ar")) }
         val arCtx = base.createConfigurationContext(cfg)
         val work = WorkState(rows, "748", mode, "1000")
-        val scale = ScalePrecision.G_0_001
+        val scale = ScalePrecision.G_0_01
         val state = MainUiState(
             work = work, scale = scale, selectedCutIndex = null,
             liveSummary = CalculationRunner.liveSummary(work),
@@ -65,3 +65,4 @@ class ScreenshotTest {
 // art
 // fix
 // again
+// larger UI

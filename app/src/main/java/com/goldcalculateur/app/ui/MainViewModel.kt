@@ -33,7 +33,7 @@ data class MainUiState(
     /** Null = no valid/up-to-date result. Any edit of the ingots or target clears it (never stale). */
     val result: ResultUi? = null,
     val liveSummary: GroupSummary? = null,
-    val scale: ScalePrecision = ScalePrecision.G_0_001,
+    val scale: ScalePrecision = ScalePrecision.G_0_01,
     val errorRow: Int? = null,
     val restored: Boolean = false,
 )
@@ -65,12 +65,6 @@ class MainViewModel(
             // Auto-save the last working state (restored when the app is reopened).
             _state.map { it.work }.distinctUntilChanged().debounce(400)
                 .collect { settings.saveWorkState(WorkStateCodec.encode(it)) }
-        }
-        viewModelScope.launch {
-            settings.scale.collect { scale ->
-                _state.update { it.copy(scale = scale) }
-                recomputeIfVisible()
-            }
         }
     }
 

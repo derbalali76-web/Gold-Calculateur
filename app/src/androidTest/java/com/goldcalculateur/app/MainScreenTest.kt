@@ -98,7 +98,7 @@ class MainScreenTest {
     @Test fun addModeResultMatchesTheEngine() {
         rule.setContent { Screen(stateFor(work(CalcMode.ADD_INGOT), calculated = true)) }
         rule.onNodeWithTag("result_card").assertIsDisplayed()
-        rule.onNodeWithTag("add_weight").assertTextContains("26.667", substring = true)
+        rule.onNodeWithTag("add_weight").assertTextContains("26.67", substring = true)
         rule.onNodeWithTag("final_karat").assertTextContains("748.00", substring = true)
     }
 
@@ -110,7 +110,7 @@ class MainScreenTest {
                 MainActions(onSelectCutIngot = { selected = it }),
             )
         }
-        rule.onNodeWithTag("cut_weight").assertTextContains("29.947", substring = true)
+        rule.onNodeWithTag("cut_weight").assertTextContains("29.95", substring = true)
         rule.onNodeWithTag("final_karat").assertTextContains("748.00", substring = true)
         rule.onNodeWithTag("cut_ingot_dropdown").performClick()
         rule.onNodeWithTag("cut_option_2").performClick()
@@ -251,10 +251,8 @@ class MainScreenTest {
         }
         rule.onNodeWithTag("choice_ar").performClick()
         rule.onNodeWithTag("choice_theme_light").performClick()
-        rule.onNodeWithTag("choice_scale_4").performClick()
         assertEquals(AppLanguage.ARABIC, lang)
         assertEquals(ThemeMode.LIGHT, theme)
-        assertEquals(ScalePrecision.G_0_0001, scale)
     }
 
     @Test fun removeAdsButtonNeedsARealPlayPrice() {
