@@ -8,8 +8,15 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -17,6 +24,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -29,8 +37,11 @@ import com.goldcalculateur.app.MainActivity
 import com.goldcalculateur.app.R
 import com.goldcalculateur.app.ads.AdaptiveBanner
 import com.goldcalculateur.app.core.AppLanguage
+import com.goldcalculateur.app.core.QuotaClock
 import com.goldcalculateur.app.core.NumberFormatter
 import com.goldcalculateur.app.data.ThemeMode
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 private const val ROUTE_MAIN = "main"
@@ -56,6 +67,8 @@ fun AppRoot(activity: MainActivity, container: AppContainer, vm: MainViewModel) 
     val adsRemoved by container.settings.adsRemoved.collectAsStateWithLifecycle(initialValue = false)
     val billing by container.billing.state.collectAsStateWithLifecycle()
     val canRequestAds by container.ads.canRequestAds.collectAsStateWithLifecycle()
+    val rewardedReady by container.ads.rewardedReady.collectAsStateWithLifecycle()
+    var showQuotaDialog by rememberSaveable { mutableStateOf(false) }
     val privacyOptionsRequired by container.ads.privacyOptionsRequired.collectAsStateWithLifecycle()
 
     val language = AppLanguage.fromTag(LocalConfiguration.current.locales[0].toLanguageTag())
@@ -65,6 +78,20 @@ fun AppRoot(activity: MainActivity, container: AppContainer, vm: MainViewModel) 
         val returningTo = navController.previousBackStackEntry?.destination?.route
         navController.popBackStack()
         if (returningTo == ROUTE_MAIN) container.ads.onNaturalTransition(activity)
+    }
+
+    // "Calculate" is free N times a day; after that a rewarded ad is OFFERED (never forced when no ad is
+    // available, when ads were removed, or when the inputs are an identical re-press).
+    val onCalculatePressed by rememberUpdatedState<() -> Unit> {
+        scope.launch {
+            if (!vm.nextCalculationIsNew()) { vm.calculate(); return@launch }
+            val q = container.settings.quota.first()
+            if (container.quota.mustWatchAd(q, QuotaClock.today(), adsRemoved, rewardedReady)) {
+                showQuotaDialog = true
+            } else {
+                vm.calculate()
+            }
+        }
     }
 
     val mainActions = remember(vm, nf) {
@@ -77,8 +104,12 @@ fun AppRoot(activity: MainActivity, container: AppContainer, vm: MainViewModel) 
             onModeChange = vm::setMode,
             onAddedKaratChange = vm::onAddedKaratChange,
             onSelectCutIngot = vm::selectCutIngot,
-            onCalculate = vm::calculate,
-            onClearAll = vm::clearAll,
+            onCalculate = { onCalculatePressed() },
+            onClearAll = {
+                vm.clearAll()
+                // Natural end of a task. Short delay so the ad never appears under the finger that just tapped.
+                scope.launch { delay(1_000); container.ads.onNaturalTransition(activity) }
+            },
             onOpenSettings = { navController.navigate(ROUTE_SETTINGS) { launchSingleTop = true } },
             onCopy = {
                 buildResultText(context, nf, latest)?.let { text ->
@@ -151,5 +182,31 @@ fun AppRoot(activity: MainActivity, container: AppContainer, vm: MainViewModel) 
                 onClear = vm::clearHistory,
             )
         }
+    }
+
+    if (showQuotaDialog) {
+        AlertDialog(
+            onDismissRequest = { showQuotaDialog = false },
+            title = { Text(stringResource(R.string.quota_title)) },
+            text = { Text(stringResource(R.string.quota_text, BuildConfig.REWARD_CALCS_PER_AD)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showQuotaDialog = false
+                    container.ads.showRewarded(
+                        activity,
+                        onRewarded = { scope.launch { container.settings.grantQuotaBonus(container.quota, QuotaClock.today()) } },
+                        onResult = { ok -> if (ok) vm.calculate() },
+                    )
+                }) { Text(stringResource(R.string.quota_watch)) }
+            },
+            dismissButton = {
+                Row {
+                    TextButton(onClick = { showQuotaDialog = false; container.billing.launchPurchase(activity) }) {
+                        Text(stringResource(R.string.quota_remove_ads))
+                    }
+                    TextButton(onClick = { showQuotaDialog = false }) { Text(stringResource(R.string.cancel)) }
+                }
+            },
+        )
     }
 }

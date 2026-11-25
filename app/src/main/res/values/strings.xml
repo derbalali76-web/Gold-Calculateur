@@ -123,4 +123,8 @@
     <string name="contact">Contact us</string>
     <string name="rate_app">Rate the app on Google Play</string>
     <string name="not_configured">Not configured yet</string>
+    <string name="quota_title">Free calculations used up</string>
+    <string name="quota_text">You have used today's free calculations. Watch a short ad to get %1$d more, or remove ads for good.</string>
+    <string name="quota_watch">Watch an ad</string>
+    <string name="quota_remove_ads">Remove ads</string>
 </resources>

@@ -115,4 +115,8 @@
     <string name="contact">تواصل معنا</string>
     <string name="rate_app">تقييم التطبيق على Google Play</string>
     <string name="not_configured">غير مضبوط بعد</string>
+    <string name="quota_title">انتهت الحسابات المجانية</string>
+    <string name="quota_text">استخدمت الحسابات المجانية لليوم. شاهد إعلانًا قصيرًا لتحصل على %1$d حسابات إضافية، أو أزل الإعلانات نهائيًا.</string>
+    <string name="quota_watch">شاهد إعلانًا</string>
+    <string name="quota_remove_ads">إزالة الإعلانات</string>
 </resources>

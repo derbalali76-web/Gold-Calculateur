@@ -28,7 +28,7 @@ class MainActivity : AppCompatActivity() {
     private val container: AppContainer get() = (application as GoldApplication).container
 
     private val viewModel: MainViewModel by viewModels {
-        viewModelFactory { initializer { MainViewModel(container.settings, container.database) } }
+        viewModelFactory { initializer { MainViewModel(container.settings, container.database, container.quota) } }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,6 +63,17 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        // App Open ad: only when returning from the background after a long idle, never mid-operation.
+        container.ads.onAppForegrounded(this, userMidOperation = viewModel.hasInputs())
+    }
+
+    override fun onStop() {
+        super.onStop()
+        container.ads.onAppBackgrounded()
     }
 
     override fun onResume() {

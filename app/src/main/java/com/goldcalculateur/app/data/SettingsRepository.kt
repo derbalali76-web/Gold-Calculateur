@@ -9,6 +9,8 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.goldcalculateur.app.core.CalculationQuota
+import com.goldcalculateur.app.core.QuotaState
 import com.goldcalculateur.engine.ScalePrecision
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -35,6 +37,9 @@ class SettingsRepository(context: Context) {
         val COMPLETED_SINCE_AD = intPreferencesKey("completed_since_ad")
         val LAST_INTERSTITIAL = longPreferencesKey("last_interstitial_at")
         val LAST_COUNTED_SIGNATURE = stringPreferencesKey("last_counted_signature")
+        val QUOTA_DAY = longPreferencesKey("quota_day")
+        val QUOTA_USED = intPreferencesKey("quota_used")
+        val QUOTA_BONUS = intPreferencesKey("quota_bonus")
     }
 
     private val safe: Flow<Preferences> = store.data.catch { e ->
@@ -55,6 +60,18 @@ class SettingsRepository(context: Context) {
     val adCounters: Flow<AdCounters> = safe.map {
         AdCounters(it[Keys.COMPLETED_SINCE_AD] ?: 0, it[Keys.LAST_INTERSTITIAL] ?: 0L)
     }
+
+    val quota: Flow<QuotaState> = safe.map {
+        QuotaState(it[Keys.QUOTA_DAY] ?: 0L, it[Keys.QUOTA_USED] ?: 0, it[Keys.QUOTA_BONUS] ?: 0)
+    }
+
+    private suspend fun editQuota(f: (QuotaState) -> QuotaState) = store.edit {
+        val n = f(QuotaState(it[Keys.QUOTA_DAY] ?: 0L, it[Keys.QUOTA_USED] ?: 0, it[Keys.QUOTA_BONUS] ?: 0))
+        it[Keys.QUOTA_DAY] = n.day; it[Keys.QUOTA_USED] = n.used; it[Keys.QUOTA_BONUS] = n.bonus
+    }
+
+    suspend fun consumeQuota(rules: CalculationQuota, today: Long) = editQuota { rules.consume(it, today) }
+    suspend fun grantQuotaBonus(rules: CalculationQuota, today: Long) = editQuota { rules.grant(it, today) }
 
     suspend fun workState(): String? = safe.first()[Keys.WORK_STATE]
     suspend fun lastCountedSignature(): String? = safe.first()[Keys.LAST_COUNTED_SIGNATURE]

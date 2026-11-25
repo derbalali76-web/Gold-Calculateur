@@ -115,4 +115,8 @@
     <string name="contact">Nous contacter</string>
     <string name="rate_app">Noter l\'application sur Google Play</string>
     <string name="not_configured">Pas encore configuré</string>
+    <string name="quota_title">Calculs gratuits épuisés</string>
+    <string name="quota_text">Vous avez utilisé les calculs gratuits du jour. Regardez une courte pub pour en obtenir %1$d de plus, ou supprimez les pubs définitivement.</string>
+    <string name="quota_watch">Voir une pub</string>
+    <string name="quota_remove_ads">Supprimer les pubs</string>
 </resources>
