@@ -96,6 +96,7 @@
     <string name="billing_unavailable">Les achats Google Play ne sont pas disponibles pour le moment.</string>
     <string name="billing_error">L\'achat n\'a pas pu aboutir. Aucun montant n\'est débité pour un achat incomplet.</string>
     <string name="billing_restored">Achats vérifiés.</string>
+    <string name="billing_nothing_to_restore">Aucun achat précédent trouvé sur ce compte Google.</string>
     <string name="privacy_options">Choix de confidentialité des publicités</string>
 
     <string name="history_title">Historique</string>

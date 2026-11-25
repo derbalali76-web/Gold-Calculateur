@@ -185,6 +185,7 @@ private fun billingMessage(status: BillingStatus): String? = when (status) {
     BillingStatus.UNAVAILABLE -> stringResource(R.string.billing_unavailable)
     BillingStatus.ERROR -> stringResource(R.string.billing_error)
     BillingStatus.RESTORED -> stringResource(R.string.billing_restored)
+    BillingStatus.NOTHING_TO_RESTORE -> stringResource(R.string.billing_nothing_to_restore)
     BillingStatus.IDLE, BillingStatus.PURCHASING, BillingStatus.SUCCESS -> null
 }
 

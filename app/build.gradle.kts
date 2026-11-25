@@ -61,9 +61,9 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            manifestPlaceholders["admobAppId"] = prop("ADMOB_APP_ID") ?: testAppId
-            buildConfigField("String", "ADMOB_BANNER_UNIT_ID", (prop("ADMOB_BANNER_UNIT_ID") ?: testBannerId).q())
-            buildConfigField("String", "ADMOB_INTERSTITIAL_UNIT_ID", (prop("ADMOB_INTERSTITIAL_UNIT_ID") ?: testInterstitialId).q())
+            manifestPlaceholders["admobAppId"] = prop("ADMOB_APP_ID") ?: ""
+            buildConfigField("String", "ADMOB_BANNER_UNIT_ID", (prop("ADMOB_BANNER_UNIT_ID") ?: "").q())
+            buildConfigField("String", "ADMOB_INTERSTITIAL_UNIT_ID", (prop("ADMOB_INTERSTITIAL_UNIT_ID") ?: "").q())
             buildConfigField("String", "PRIVACY_POLICY_URL", (prop("PRIVACY_POLICY_URL") ?: "").q())
             buildConfigField("String", "TERMS_URL", (prop("TERMS_URL") ?: "").q())
             buildConfigField("String", "CONTACT_EMAIL", (prop("CONTACT_EMAIL") ?: "").q())
@@ -101,6 +101,9 @@ val missingForRelease = requiredForRelease.filter { prop(it) == null }
 val recommendedForRelease = listOf("PRIVACY_POLICY_URL", "TERMS_URL", "CONTACT_EMAIL")
 val usesGoogleTestIds = listOf("ADMOB_APP_ID", "ADMOB_BANNER_UNIT_ID", "ADMOB_INTERSTITIAL_UNIT_ID")
     .any { prop(it)?.contains("3940256099942544") == true }
+// Release ids must also look like real AdMob ids (publisher "ca-app-pub-<16 digits>").
+val malformedAdIds = listOf("ADMOB_APP_ID", "ADMOB_BANNER_UNIT_ID", "ADMOB_INTERSTITIAL_UNIT_ID")
+    .filter { prop(it)?.matches(Regex("""ca-app-pub-\d{16}[~/]\d+""")) == false }
 
 val verifyReleaseConfig by tasks.registering {
     group = "verification"
@@ -112,6 +115,9 @@ val verifyReleaseConfig by tasks.registering {
         val missingRecommended = recommendedForRelease.filter { prop(it) == null }
         if (missingRecommended.isNotEmpty()) {
             logger.warn("WARNING: not set (required before Play submission): $missingRecommended")
+        }
+        if (malformedAdIds.isNotEmpty()) {
+            throw GradleException("Release build blocked: malformed AdMob ids: $malformedAdIds")
         }
         if (usesGoogleTestIds) {
             throw GradleException("Release build blocked: AdMob test ids must not be used in a release.")

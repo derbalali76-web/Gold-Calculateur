@@ -30,7 +30,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-enum class BillingStatus { IDLE, PURCHASING, PENDING, SUCCESS, CANCELLED, NETWORK, UNAVAILABLE, ERROR, RESTORED }
+enum class BillingStatus { IDLE, PURCHASING, PENDING, SUCCESS, CANCELLED, NETWORK, UNAVAILABLE, ERROR, RESTORED, NOTHING_TO_RESTORE }
 
 data class BillingUiState(
     /** Localised price straight from Google Play (e.g. "1,99 US$"), null until loaded. */
@@ -139,12 +139,18 @@ class BillingManager(
         }
         apply(result.purchasesList, authoritative = true)
         if (userInitiated && _state.value.status == BillingStatus.IDLE) {
-            _state.update { it.copy(status = BillingStatus.RESTORED) }
+            // Nothing owned: say so instead of a misleading "purchases checked / restored".
+            val owned = EntitlementLogic.decide(productId, result.purchasesList.map { it.toSnapshot() })
+            _state.update { it.copy(status = if (owned.entitled) BillingStatus.RESTORED else BillingStatus.NOTHING_TO_RESTORE) }
         }
     }
 
     fun launchPurchase(activity: Activity) {
         val details = productDetails
+        if (client.isReady && details == null) {
+            // The price query failed earlier (e.g. offline at start-up): retry now, user can tap again.
+            scope.launch { loadProductDetails() }
+        }
         if (!client.isReady || details == null) {
             fail(if (client.isReady) BillingFailure.UNAVAILABLE else BillingFailure.NETWORK)
             connect()
