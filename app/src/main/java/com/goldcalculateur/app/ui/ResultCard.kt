@@ -150,7 +150,7 @@ private fun CutBody(res: ResultUi.Cut, nf: NumberFormatter, actions: MainActions
                 .fillMaxWidth()
                 .clip(pickerShape)
                 .background(Look.FieldBg)
-                .border(1.5.px(), Look.FieldBorder, pickerShape)
+                .border(2.px(), Look.FieldBorder, pickerShape)
                 .clickable { menuOpen = true }
                 .padding(horizontal = 22.px(), vertical = 14.px())
                 .testTag("cut_ingot_dropdown"),
