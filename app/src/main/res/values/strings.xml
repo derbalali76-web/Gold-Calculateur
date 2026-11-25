@@ -104,6 +104,7 @@
     <string name="billing_unavailable">Google Play purchases are not available right now.</string>
     <string name="billing_error">The purchase could not be completed. You were not charged for an incomplete purchase.</string>
     <string name="billing_restored">Purchases checked.</string>
+    <string name="billing_nothing_to_restore">No previous purchase found on this Google account.</string>
     <string name="privacy_options">Ad privacy choices</string>
 
     <string name="history_title">History</string>

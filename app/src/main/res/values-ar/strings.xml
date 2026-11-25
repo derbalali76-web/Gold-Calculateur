@@ -96,6 +96,7 @@
     <string name="billing_unavailable">مشتريات Google Play غير متاحة حالياً.</string>
     <string name="billing_error">تعذّر إتمام الشراء. لن يُحتسب عليك مبلغ لعملية غير مكتملة.</string>
     <string name="billing_restored">تم التحقق من المشتريات.</string>
+    <string name="billing_nothing_to_restore">لم يتم العثور على عملية شراء سابقة في حساب Google هذا.</string>
     <string name="privacy_options">خيارات خصوصية الإعلانات</string>
 
     <string name="history_title">سجل العمليات</string>
