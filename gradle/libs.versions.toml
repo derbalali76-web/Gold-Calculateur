@@ -10,9 +10,9 @@ navigation = "2.8.9"
 datastore = "1.1.4"
 room = "2.7.1"
 coroutines = "1.10.1"
-playServicesAds = "25.4.0"
-unityAds = "4.20.0"
-unityAdsAdapter = "4.20.0.1"
+playServicesAds = "25.1.0"
+unityAds = "4.16.5"
+unityAdsAdapter = "4.17.0.0"
 ump = "3.2.0"
 billing = "7.1.1"
 junit = "4.13.2"
@@ -40,7 +40,7 @@ androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref =
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
 google-play-services-ads = { module = "com.google.android.gms:play-services-ads", version.ref = "playServicesAds" }
-# AdMob Mediation: Unity Ads SDK + its AdMob adapter (versions must stay in step: adapter 4.20.0.x <-> SDK 4.20.0).
+# AdMob Mediation: Unity Ads SDK + its AdMob adapter (versions must stay in step: adapter 4.17.0.0 was built with SDK 4.16.5).
 unity-ads = { module = "com.unity3d.ads:unity-ads", version.ref = "unityAds" }
 unity-ads-adapter = { module = "com.google.ads.mediation:unity", version.ref = "unityAdsAdapter" }
 google-ump = { module = "com.google.android.ump:user-messaging-platform", version.ref = "ump" }
