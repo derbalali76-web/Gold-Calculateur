@@ -164,6 +164,8 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
 
     implementation(libs.google.play.services.ads)
+    implementation(libs.unity.ads)
+    implementation(libs.unity.ads.adapter)
     implementation(libs.google.ump)
     implementation(libs.android.billing.ktx)
 

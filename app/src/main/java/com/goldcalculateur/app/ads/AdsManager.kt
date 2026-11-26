@@ -2,6 +2,7 @@ package com.goldcalculateur.app.ads
 
 import android.app.Activity
 import android.app.Application
+import android.os.SystemClock
 import android.util.Log
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -14,6 +15,8 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
+import com.google.android.gms.ads.ResponseInfo
+import com.google.android.gms.ads.initialization.InitializationStatus
 import com.google.android.gms.ads.appopen.AppOpenAd
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
@@ -24,16 +27,18 @@ import com.google.android.ump.ConsentRequestParameters
 import com.google.android.ump.UserMessagingPlatform
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.lang.ref.WeakReference
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Owns everything ad-related: consent (UMP), SDK initialisation, the interstitial lifecycle.
- * Only two formats exist: adaptive banner (see [AdaptiveBanner]) and interstitial.
- * No rewarded, app-open or native ads.
+ * Formats: adaptive banner (see [AdaptiveBanner]), interstitial, rewarded and app-open.
+ * Mediation: AdMob serves the ad and may route the request to Unity Ads (configured in the AdMob console).
  *
  * The interstitial is shown ONLY from [onNaturalTransition], which the UI calls when the user
  * navigates back to the calculator from the History or Settings screens.
@@ -77,7 +82,55 @@ class AdsManager(
     private var loading = false
     private var fullScreenShowing = false
     private val sdkInitStarted = AtomicBoolean(false)
+    private var activityRef: WeakReference<Activity>? = null
+    private var interstitialAttempts = 0
+    private var rewardedAttempts = 0
+    private var appOpenAttempts = 0
     private var consentGathered = false
+
+    /**
+     * Some mediation networks need an Activity (not just the Application) to load full-screen ads.
+     * Call from MainActivity; only a weak reference is kept, so nothing leaks.
+     */
+    fun attachActivity(activity: Activity) {
+        activityRef = WeakReference(activity)
+    }
+
+    private fun loadContext(): android.content.Context =
+        activityRef?.get()?.takeIf { !it.isFinishing && !it.isDestroyed } ?: app
+
+    /** Quiet retry with growing delay (30 s, 60 s, 120 s) for ads that did not fill; gives up after 3 tries. */
+    private fun retryLater(attempt: Int, block: () -> Unit) {
+        if (attempt > 3) return
+        scope.launch(Dispatchers.Main) {
+            delay(15_000L shl attempt)
+            if (!adsRemoved && _canRequestAds.value) block()
+        }
+    }
+
+    /** Which network actually served the ad (AdMob itself, Unity Ads, ...). Shows up in Logcat, tag AdsManager. */
+    private fun logWinner(event: String, info: ResponseInfo?) {
+        val w = info?.loadedAdapterResponseInfo
+        Log.i(
+            TAG,
+            "$event | source=${w?.adSourceName ?: "unknown"} | adapter=${w?.adapterClassName ?: info?.mediationAdapterClassName} " +
+                "| instance=${w?.adSourceInstanceName} | latency=${w?.latencyMillis}ms",
+        )
+    }
+
+    private fun logAdapterErrors(event: String, error: LoadAdError) {
+        Log.w(TAG, "$event failed: code=${error.code} msg=${error.message}")
+        error.responseInfo?.adapterResponses?.forEach {
+            Log.w(TAG, "  tried ${it.adSourceName} (${it.adapterClassName}) latency=${it.latencyMillis}ms error=${it.adError?.code}:${it.adError?.message}")
+        }
+    }
+
+    private fun logAdapterStatus(status: InitializationStatus, totalMillis: Long) {
+        Log.i(TAG, "MobileAds initialised in ${totalMillis}ms (${status.adapterStatusMap.size} adapters)")
+        status.adapterStatusMap.forEach { (cls, st) ->
+            Log.i(TAG, "  adapter=$cls state=${st.initializationState} latency=${st.latency}ms desc=${st.description}")
+        }
+    }
 
     /** Called whenever the entitlement changes. After purchase: stop loading and showing ads. */
     fun setAdsRemoved(removed: Boolean) {
@@ -135,12 +188,25 @@ class AdsManager(
             if (!adsRemoved) preloadAll()
             return
         }
-        scope.launch(Dispatchers.IO) {
-            MobileAds.initialize(app) { }
+        // Initialise OFF the main thread; ads are requested only after every adapter reported its status
+        // (or after a 10 s safety timeout), so a slow network can never delay or hang the calculator.
+        val done = AtomicBoolean(false)
+        fun proceed() {
+            if (!done.compareAndSet(false, true)) return
             scope.launch(Dispatchers.Main) {
                 _canRequestAds.value = !adsRemoved
                 preloadAll()
             }
+        }
+        scope.launch(Dispatchers.IO) {
+            val t0 = SystemClock.elapsedRealtime()
+            MobileAds.initialize(app) { status ->
+                logAdapterStatus(status, SystemClock.elapsedRealtime() - t0)
+                proceed()
+            }
+            delay(10_000L)
+            if (!done.get()) Log.w(TAG, "MobileAds init is slow (>10s); continuing without waiting")
+            proceed()
         }
     }
 
@@ -155,10 +221,12 @@ class AdsManager(
         val unitId = BuildConfig.ADMOB_REWARDED_UNIT_ID
         if (unitId.isBlank() || adsRemoved || !_canRequestAds.value || rewarded != null || rewardedLoading) return
         rewardedLoading = true
-        RewardedAd.load(app, unitId, AdRequest.Builder().build(), object : RewardedAdLoadCallback() {
+        RewardedAd.load(loadContext(), unitId, AdRequest.Builder().build(), object : RewardedAdLoadCallback() {
             override fun onAdLoaded(ad: RewardedAd) {
                 rewardedLoading = false
                 if (adsRemoved) return
+                rewardedAttempts = 0
+                logWinner("Rewarded loaded", ad.responseInfo)
                 rewarded = ad
                 _rewardedReady.value = true
             }
@@ -167,7 +235,8 @@ class AdsManager(
                 rewardedLoading = false
                 rewarded = null
                 _rewardedReady.value = false
-                Log.w(TAG, "Rewarded failed to load: ${error.code}")
+                logAdapterErrors("Rewarded load", error)
+                retryLater(++rewardedAttempts) { preloadRewarded() }
             }
         })
     }
@@ -177,10 +246,12 @@ class AdsManager(
         if (unitId.isBlank() || adsRemoved || !_canRequestAds.value || appOpenLoading) return
         if (appOpen != null && !appOpenExpired()) return
         appOpenLoading = true
-        AppOpenAd.load(app, unitId, AdRequest.Builder().build(), object : AppOpenAd.AppOpenAdLoadCallback() {
+        AppOpenAd.load(loadContext(), unitId, AdRequest.Builder().build(), object : AppOpenAd.AppOpenAdLoadCallback() {
             override fun onAdLoaded(ad: AppOpenAd) {
                 appOpenLoading = false
                 if (adsRemoved) return
+                appOpenAttempts = 0
+                logWinner("AppOpen loaded", ad.responseInfo)
                 appOpen = ad
                 appOpenLoadedAt = System.currentTimeMillis()
             }
@@ -188,7 +259,8 @@ class AdsManager(
             override fun onAdFailedToLoad(error: LoadAdError) {
                 appOpenLoading = false
                 appOpen = null
-                Log.w(TAG, "App open failed to load: ${error.code}")
+                logAdapterErrors("AppOpen load", error)
+                retryLater(++appOpenAttempts) { preloadAppOpen() }
             }
         })
     }
@@ -227,6 +299,8 @@ class AdsManager(
                 return@launch
             }
             ad.fullScreenContentCallback = object : FullScreenContentCallback() {
+                override fun onAdImpression() = logWinner("AppOpen SHOWN", ad.responseInfo)
+
                 override fun onAdShowedFullScreenContent() {
                     fullScreenShowing = true
                     appOpenShownThisSession = true
@@ -264,6 +338,8 @@ class AdsManager(
         var reported = false
         fun finish(ok: Boolean) { if (!reported) { reported = true; onResult(ok) } }
         ad.fullScreenContentCallback = object : FullScreenContentCallback() {
+            override fun onAdImpression() = logWinner("Rewarded SHOWN", ad.responseInfo)
+
             override fun onAdShowedFullScreenContent() { fullScreenShowing = true }
 
             override fun onAdDismissedFullScreenContent() {
@@ -295,11 +371,13 @@ class AdsManager(
         if (adsRemoved || !_canRequestAds.value || interstitial != null || loading) return
         loading = true
         InterstitialAd.load(
-            app, BuildConfig.ADMOB_INTERSTITIAL_UNIT_ID, AdRequest.Builder().build(),
+            loadContext(), BuildConfig.ADMOB_INTERSTITIAL_UNIT_ID, AdRequest.Builder().build(),
             object : InterstitialAdLoadCallback() {
                 override fun onAdLoaded(ad: InterstitialAd) {
                     loading = false
                     if (adsRemoved) return
+                    interstitialAttempts = 0
+                    logWinner("Interstitial loaded", ad.responseInfo)
                     interstitial = ad
                 }
 
@@ -307,7 +385,8 @@ class AdsManager(
                     // Load failure never blocks the app. We simply try again at the next opportunity.
                     loading = false
                     interstitial = null
-                    Log.w(TAG, "Interstitial failed to load: ${error.code}")
+                    logAdapterErrors("Interstitial load", error)
+                    retryLater(++interstitialAttempts) { preloadInterstitial() }
                 }
             },
         )
@@ -343,6 +422,8 @@ class AdsManager(
                 return@launch
             }
             ad.fullScreenContentCallback = object : FullScreenContentCallback() {
+                override fun onAdImpression() = logWinner("Interstitial SHOWN", ad.responseInfo)
+
                 override fun onAdShowedFullScreenContent() {
                     fullScreenShowing = true
                     scope.launch { settings.markInterstitialShown(System.currentTimeMillis()) }
