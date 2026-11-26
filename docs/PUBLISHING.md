@@ -16,7 +16,7 @@
 - الوصف والنصوص: `store/listing_ar.md` / `listing_fr.md` / `listing_en.md`.
 - الأيقونة: `store/play_store_icon_512.png` — رسم الميزة: `store/feature_graphic_1024x500.png`.
 - **لقطات الشاشة:** يجب التقاطها من التطبيق الحقيقي (لم أستطع تشغيله هنا). شغّل `tools/capture_screenshots.sh` مع محاكي/هاتف (عربي وفرنسي وإنجليزي، 2–8 لقطات للهاتف).
-- سياسة الخصوصية: استضف `docs/privacy/index.html` (مثلاً GitHub Pages) وضع الرابط في Play Console وفي `PRIVACY_POLICY_URL`، واستبدل `CONTACT_EMAIL_HERE` ببريدك.
+- سياسة الخصوصية: استضف `docs/privacy/index.html` (مثلاً GitHub Pages) وضع الرابط في Play Console وفي `PRIVACY_POLICY_URL`، واستبدل `derbalali.bjtr@gmail.com` ببريدك.
 - نموذج Data Safety: `store/data_safety.md`.
 - Ads: «التطبيق يحتوي على إعلانات = نعم». الفئة العمرية: بالغون (لا تستهدف الأطفال). تصنيف المحتوى: أجب عن الاستبيان (لا محتوى حساس).
 
