@@ -13,6 +13,7 @@ coroutines = "1.10.1"
 playServicesAds = "25.1.0"
 unityAds = "4.16.5"
 unityAdsAdapter = "4.17.0.0"
+applovinAdapter = "13.6.1.0"
 ump = "3.2.0"
 billing = "7.1.1"
 junit = "4.13.2"
@@ -43,6 +44,8 @@ google-play-services-ads = { module = "com.google.android.gms:play-services-ads"
 # AdMob Mediation: Unity Ads SDK + its AdMob adapter (versions must stay in step: adapter 4.17.0.0 was built with SDK 4.16.5).
 unity-ads = { module = "com.unity3d.ads:unity-ads", version.ref = "unityAds" }
 unity-ads-adapter = { module = "com.google.ads.mediation:unity", version.ref = "unityAdsAdapter" }
+# AppLovin adapter pulls the AppLovin SDK itself (min API 24).
+applovin-adapter = { module = "com.google.ads.mediation:applovin", version.ref = "applovinAdapter" }
 google-ump = { module = "com.google.android.ump:user-messaging-platform", version.ref = "ump" }
 android-billing-ktx = { module = "com.android.billingclient:billing-ktx", version.ref = "billing" }
 junit = { module = "junit:junit", version.ref = "junit" }

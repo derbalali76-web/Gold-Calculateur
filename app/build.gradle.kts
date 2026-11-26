@@ -166,6 +166,7 @@ dependencies {
     implementation(libs.google.play.services.ads)
     implementation(libs.unity.ads)
     implementation(libs.unity.ads.adapter)
+    implementation(libs.applovin.adapter)
     implementation(libs.google.ump)
     implementation(libs.android.billing.ktx)
 
