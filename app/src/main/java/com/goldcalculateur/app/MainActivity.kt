@@ -34,6 +34,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        container.ads.attachActivity(this)
 
         // Consent + ads initialisation are skipped entirely for buyers (entitlement is cached locally).
         lifecycleScope.launch {
@@ -67,6 +68,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
+        container.ads.attachActivity(this)
         // App Open ad: only when returning from the background after a long idle, never mid-operation.
         container.ads.onAppForegrounded(this, userMidOperation = viewModel.hasInputs())
     }

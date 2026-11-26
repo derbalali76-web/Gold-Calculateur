@@ -1,5 +1,6 @@
 package com.goldcalculateur.app.ads
 
+import android.util.Log
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -23,6 +24,7 @@ import com.google.android.gms.ads.LoadAdError
 import kotlinx.coroutines.delay
 
 private const val RETRY_AFTER_FAILURE_MS = 60_000L
+private const val TAG = "AdaptiveBanner"
 
 /**
  * The real AdMob ADAPTIVE BANNER. It replaces the old "advertising space" placeholder:
@@ -31,6 +33,8 @@ private const val RETRY_AFTER_FAILURE_MS = 60_000L
  *  - height = the adaptive size computed from the available width (space is reserved while loading)
  *  - if the request fails the slot collapses to zero height (no big empty area) and retries after 60 s
  *  - paused/resumed with the lifecycle, destroyed on dispose
+ *  - ONE request per AdView: this code never refreshes. The refresh interval is set only in the AdMob
+ *    console (and disabled in the Unity dashboard) so mediation cannot double-refresh the banner.
  */
 @Composable
 fun AdaptiveBanner(unitId: String, modifier: Modifier = Modifier) {
@@ -55,7 +59,21 @@ fun AdaptiveBanner(unitId: String, modifier: Modifier = Modifier) {
                     setAdSize(adSize)
                     adUnitId = unitId
                     adListener = object : AdListener() {
+                        override fun onAdLoaded() {
+                            val w = responseInfo?.loadedAdapterResponseInfo
+                            Log.i(TAG, "Banner loaded | source=${w?.adSourceName ?: "unknown"} | adapter=${w?.adapterClassName} | latency=${w?.latencyMillis}ms")
+                        }
+
+                        override fun onAdImpression() {
+                            val w = responseInfo?.loadedAdapterResponseInfo
+                            Log.i(TAG, "Banner SHOWN | source=${w?.adSourceName ?: "unknown"} | adapter=${w?.adapterClassName}")
+                        }
+
                         override fun onAdFailedToLoad(error: LoadAdError) {
+                            Log.w(TAG, "Banner failed: code=${error.code} msg=${error.message}")
+                            error.responseInfo?.adapterResponses?.forEach {
+                                Log.w(TAG, "  tried ${it.adSourceName} latency=${it.latencyMillis}ms error=${it.adError?.code}:${it.adError?.message}")
+                            }
                             failed = true
                         }
                     }
